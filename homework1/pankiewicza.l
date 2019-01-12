@@ -59,144 +59,127 @@ void printTokenInfo(const char* token_type, const char* lexeme);
 
 WSPACE [ \t\v\r]+
 NEWLINE \n
+
 DIGIT [0-9]
 LETTER [a-zA-Z]
+
 IDENT ({LETTER}|\_)+({LETTER}|{DIGIT}|\_)*
+
 FLOATCONST (\+|-)?(({DIGIT})*\.({DIGIT})+)
 INTCONST (\+|-)?{DIGIT}+
+
 STRCONST (\")({LETTER}|{DIGIT}|{WSPACE}|.)+(\")
-LPAREN (\()
-RPAREN (\))
-LBRACE (\{)
-RBRACE (\})
-LBRACKET (\[)
-RBRACKET (\])
-ADD (\+)
-SUB (\-)
-MULT (\*)
-DIV (\/)
-MOD (\%%)
-POWER (\^)
-LT (\<)
-LE (\<=)
-GT (\>)
-GE (\>=)
-EQ (\==)
-NE (\!=)
-NOT (\!)
-AND (\&)
-OR (\|)
-ASSIGN (\=)
-COMMENT #+.+
+
+COMMENT #+.*
 
 %%
 
-{LPAREN} {
+"(" {
     printTokenInfo("LPAREN", yytext);
     return T_LPAREN;
 }
 
-{RPAREN} {
+")" {
     printTokenInfo("RPAREN", yytext);
     return T_RPAREN;
 }
 
-{LBRACE} {
+"{" {
     printTokenInfo("LBRACE", yytext);
     return T_LBRACE;
 }
 
-{RBRACE} {
+"}" {
     printTokenInfo("RBRACE", yytext);
     return T_RBRACE;
 }
 
-{LBRACKET} {
+"[" {
     printTokenInfo("LBRACKET", yytext);
     return T_LBRACKET;
 }
 
-{RBRACKET} {
+"]" {
     printTokenInfo("RBRACKET", yytext);
     return T_RBRACKET;
 }
 
-{ADD} {
+"+" {
     printTokenInfo("ADD", yytext);
     return T_ADD;
 }
 
-{SUB} {
+"-" {
     printTokenInfo("SUB", yytext);
     return T_SUB;
 }
 
-{MULT} {
+"*" {
     printTokenInfo("MULT", yytext);
     return T_MULT;
 }
 
-{DIV} {
+"/" {
     printTokenInfo("DIV", yytext);
     return T_DIV;
 }
 
-{MOD} {
+"%%" {
     printTokenInfo("MOD", yytext);
     return T_MOD;
 }
 
-{POWER} {
+"^" {
     printTokenInfo("POWER", yytext);
     return T_POWER;
 }
 
-{LT} {
+"<" {
     printTokenInfo("LT", yytext);
     return T_LT;
 }
 
-{LE} {
+"<=" {
     printTokenInfo("LE", yytext);
     return T_LE;
 }
 
-{GT} {
+">" {
     printTokenInfo("GT", yytext);
     return T_GT;
 }
 
-{GE} {
+">=" {
     printTokenInfo("GE", yytext);
     return T_GE;
 }
 
-{EQ} {
+"==" {
     printTokenInfo("EQ", yytext);
     return T_EQ;
 }
 
-{NE} {
+"!=" {
     printTokenInfo("NE", yytext);
     return T_NE;
 }
 
-{NOT} {
+"!" {
     printTokenInfo("NOT", yytext);
     return T_NOT;
 }
 
-{AND} {
+"&" {
     printTokenInfo("AND", yytext);
     return T_AND;
 }
 
-{OR} {
-    printTokenInfo("AND", yytext);
+"|" {
+    printTokenInfo("OR", yytext);
     return T_OR;
 }
 
-{ASSIGN} {
+"=" {
     printTokenInfo("ASSIGN", yytext);
     return T_ASSIGN;
 }
@@ -323,7 +306,7 @@ COMMENT #+.+
 
 void printTokenInfo(const char* token_type, const char* lexeme)
 {
-    printf("TOKEN: %s \t\t\t LEXEME: %s\n", token_type, lexeme);
+    printf("TOKEN: %s \t\t LEXEME: %s\n", token_type, lexeme);
 }
 
 int yywrap() { return(1); }
