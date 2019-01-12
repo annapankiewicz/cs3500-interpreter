@@ -46,7 +46,7 @@
 #define T_GE            38
 #define T_EQ            39
 #define T_NE            40
-#define T_FACT          41
+#define T_NOT           41
 #define T_AND           42
 #define T_OR            43
 #define T_ASSIGN        44
@@ -83,7 +83,7 @@ GT (\>)
 GE (\>=)
 EQ (\==)
 NE (\!=)
-FACT (\!)
+NOT (\!)
 AND (\&)
 OR (\|)
 ASSIGN (\=)
@@ -91,64 +91,14 @@ COMMENT #+.+
 
 %%
 
-{EQ} {
-    printTokenInfo("EQ", yytext);
-    return T_EQ;
-}
-
-{GE} {
-    printTokenInfo("GE", yytext);
-    return T_GE;
-}
-
-{GT} {
-    printTokenInfo("GT", yytext);
-    return T_GT;
-}
-
-{LE} {
-    printTokenInfo("LE", yytext);
-    return T_LE;
-}
-
-{LT} {
-    printTokenInfo("LT", yytext);
-    return T_LT;
-}
-
-{SUB} {
-    printTokenInfo("SUB", yytext);
-    return T_SUB;
-}
-
-{DIV} {
-    printTokenInfo("DIV", yytext);
-    return T_DIV;
-}
-
-{NE} {
-    printTokenInfo("NE", yytext);
-    return T_NE;
-}
-
-{MULT} {
-    printTokenInfo("MULT", yytext);
-    return T_MULT;
-}
-
-{ADD} {
-    printTokenInfo("ADD", yytext);
-    return T_ADD;
+{LPAREN} {
+    printTokenInfo("LPAREN", yytext);
+    return T_LPAREN;
 }
 
 {RPAREN} {
     printTokenInfo("RPAREN", yytext);
     return T_RPAREN;
-}
-
-{LPAREN} { 
-    printTokenInfo("LPAREN", yytext);
-    return T_LPAREN;
 }
 
 {LBRACE} {
@@ -169,6 +119,101 @@ COMMENT #+.+
 {RBRACKET} {
     printTokenInfo("RBRACKET", yytext);
     return T_RBRACKET;
+}
+
+{ADD} {
+    printTokenInfo("ADD", yytext);
+    return T_ADD;
+}
+
+{SUB} {
+    printTokenInfo("SUB", yytext);
+    return T_SUB;
+}
+
+{MULT} {
+    printTokenInfo("MULT", yytext);
+    return T_MULT;
+}
+
+{DIV} {
+    printTokenInfo("DIV", yytext);
+    return T_DIV;
+}
+
+{MOD} {
+    printTokenInfo("MOD", yytext);
+    return T_MOD;
+}
+
+{POWER} {
+    printTokenInfo("POWER", yytext);
+    return T_POWER;
+}
+
+{LT} {
+    printTokenInfo("LT", yytext);
+    return T_LT;
+}
+
+{LE} {
+    printTokenInfo("LE", yytext);
+    return T_LE;
+}
+
+{GT} {
+    printTokenInfo("GT", yytext);
+    return T_GT;
+}
+
+{GE} {
+    printTokenInfo("GE", yytext);
+    return T_GE;
+}
+
+{EQ} {
+    printTokenInfo("EQ", yytext);
+    return T_EQ;
+}
+
+{NE} {
+    printTokenInfo("NE", yytext);
+    return T_NE;
+}
+
+{NOT} {
+    printTokenInfo("NOT", yytext);
+    return T_NOT;
+}
+
+{AND} {
+    printTokenInfo("AND", yytext);
+    return T_AND;
+}
+
+{OR} {
+    printTokenInfo("AND", yytext);
+    return T_OR;
+}
+
+{ASSIGN} {
+    printTokenInfo("ASSIGN", yytext);
+    return T_ASSIGN;
+}
+
+";" {
+    printTokenInfo("SEMICOLON", yytext);
+    return T_SEMICOLON;
+}
+
+":" {
+    printTokenInfo("COLON", yytext);
+    return T_COLON;
+}
+
+"," {
+    printTokenInfo("COMMA", yytext);
+    return T_COMMA;
 }
 
 "TRUE" {
