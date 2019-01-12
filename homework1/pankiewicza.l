@@ -51,7 +51,7 @@
 #define T_OR            43
 #define T_ASSIGN        44
 
-int num_lines = 1;
+int num_lines = 0;
 
 void printTokenInfo(const char* token_type, const char* lexeme);
 
@@ -62,8 +62,8 @@ NEWLINE \n
 DIGIT [0-9]
 LETTER [a-zA-Z]
 IDENT ({LETTER}|\_)+({LETTER}|{DIGIT}|\_)*
+FLOATCONST (\+|-)?(({DIGIT})*\.({DIGIT})+)
 INTCONST (\+|-)?{DIGIT}+
-FLOATCONST (\+|-)({DIGIT})*.({DIGIT})+
 STRCONST (\")({LETTER}|{DIGIT}|{WSPACE}|.)+(\")
 LPAREN (\()
 RPAREN (\))
@@ -87,6 +87,7 @@ FACT (\!)
 AND (\&)
 OR (\|)
 ASSIGN (\=)
+COMMENT #+.+
 
 %%
 
@@ -245,18 +246,18 @@ ASSIGN (\=)
     return T_STRCONST;
 }
 
-{FLOATCONST} {
-    printTokenInfo("FLOATCONST", yytext);
-    return T_FLOATCONST;
-}
-
 {INTCONST} {
     printTokenInfo("INTCONST", yytext);
     return T_INTCONST;
 }
 
+{FLOATCONST} {
+    printTokenInfo("FLOATCONST", yytext);
+    return T_FLOATCONST;
+}
+
 {IDENT} {
-    printTokenInfo("IDENT", yytext");
+    printTokenInfo("IDENT", yytext);
     return T_IDENT;
 }
 
@@ -277,7 +278,7 @@ ASSIGN (\=)
 
 void printTokenInfo(const char* token_type, const char* lexeme)
 {
-    printf("TOKEN: %s \t\t LEXEME: %s\n", token_type, lexeme);
+    printf("TOKEN: %s \t\t\t LEXEME: %s\n", token_type, lexeme);
 }
 
 int yywrap() { return(1); }
