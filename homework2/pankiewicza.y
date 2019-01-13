@@ -98,6 +98,63 @@ N_EXPR          : N_CONST
                 }
                 ;
 
+N_CONST         : T_INTCONST
+                {
+                    printRule("CONST", "INTCONST");
+                }
+                | T_STRCONST
+                {
+                    printRule("CONST", "STRCONST");
+                }
+                | T_FLOATCONST
+                {
+                    printRule("CONST", "STRCONST");
+                }
+                | T_TRUE
+                {
+                    printRule("CONST", "TRUE");
+                }
+                | T_FALSE
+                {
+                    printRule("CONST", "FALSE");
+                }
+                ;
+
+N_ARITHLOGIC_EXPR : N_UN_OP N_EXPR
+                {
+                    printRule("ARITHLOGIC_EXPR", "UN_OP N_EXPR");
+                }
+                | N_EXPR N_BIN_OP N_EXPR
+                {
+                    printRule("ARITHLOGIC_EXPR", "EXPR BIN_OP EXPR");
+                }
+                ;
+
+N_COMPOUND_EXPR : T_LBRACE N_EXPR N_EXPR_LIST T_RBRACE
+                {
+                    printRule("COMPOUND_EXPR",
+                              "{ EXPR EXPR_LIST }");
+                }
+                ;
+
+N_EXPR_LIST     : T_SEMICOLON N_EXPR N_EXPR_LIST
+                {
+                    printRule("EXPR_LIST", "; EXPR EXPR_LIST");
+                }
+                | /* epsilon */
+                ;
+
+N_IF_EXPR       : T_IF T_LPAREN N_EXPR T_RPAREN N_EXPR
+                {
+                    printRule("IF_EXPR", "IF ( EXPR ) EXPR")
+                }
+                | T_IF T_LPAREN N_EXPR T_RPAREN N_EXPR T_ELSE N_EXPR
+                {
+                    printRule("IF_EXPR", "IF ( EXPR ) ");
+                }
+                ;
+
+
 %%
 
 #include "lex.yy.c"
