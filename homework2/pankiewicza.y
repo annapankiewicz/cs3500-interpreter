@@ -154,6 +154,43 @@ N_IF_EXPR       : T_IF T_LPAREN N_EXPR T_RPAREN N_EXPR
                 }
                 ;
 
+N_WHILE_EXPR    : T_WHILE T_LPAREN N_EXPR T_RPAREN N_LOOP_EXPR
+                {
+                    printRule("WHILE_EXPR", "WHILE ( VAR IN LIST ) LOOP_EXPR";)
+                }
+                ;
+
+N_FOR_EXPR      : T_FOR T_LPAREN N_VAR T_IN N_LIST T_RPAREN N_LOOP_EXPR
+                {
+                    printRule("FOR_EXPR", "FOR ( VAR IN LIST ) LOOP_EXPR");
+                }
+                ;
+
+N_LOOP_EXPR     : N_EXPR
+                {
+                    printRule("LOOP_EXPR", "EXPR");
+                }
+                | N_BREAK_EXPR
+                {
+                    printRule("LOOP_EXPR", "BREAK_EXPR");
+                }
+                | N_NEXT_EXPR
+                {
+                    printRule("LOOP_EXPR", "NEXT_EXPR");
+                }
+                ;
+
+N_BREAK_EXPR    : T_BREAK
+                {
+                    printRule("BREAK_EXPR", "BREAK");
+                }
+                ;
+
+N_NEXT_EXPR     : T_NEXT
+                {
+                    printRule("NEXT_EXPR", "NEXT");
+                }
+                ;
 
 %%
 
