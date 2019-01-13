@@ -31,7 +31,7 @@ extern "C" {
 %token T_WHILE T_FUNCTION T_FOR T_IN T_NEXT T_BREAK T_TRUE T_FALSE T_QUIT
 %token T_PRINT T_CAT T_READ T_LPAREN T_RPAREN T_LBRACE T_RBRACE T_LBRACKET
 %token T_RBRACKET T_COLON T_SEMICOLON T_COMMA T_ADD T_SUB T_MULT T_DIV T_MOD
-%token T_POWER T_LT T_LE T_GT T_GE T_EQ T_NE T_NOT T_AND T_OR T_ASSIGN
+%token T_POW T_LT T_LE T_GT T_GE T_EQ T_NE T_NOT T_AND T_OR T_ASSIGN
 
 %start N_START
 
@@ -282,6 +282,98 @@ N_ARGS          : N_EXPR
                 | N_EXPR T_COMMA N_ARGS
                 {
                     printRule("ARGS", "EXPR, ARGS");
+                }
+                ;
+
+N_BIN_OP        : N_ARITH_OP
+                {
+                    printRule("BIN_OP", "ARITH_OP");
+                }
+                | N_LOG_OP
+                {
+                    printRule("BIN_OP", "LOG_OP");
+                }
+                | N_REL_OP
+                {
+                    printRule("BIN_OP", "REL_OP");
+                }
+                ;
+
+N_ARITH_OP      : T_MULT
+                {
+                    printRule("ARITH_OP", "*");
+                }
+                | T_SUB
+                {
+                    printRule("ARITH_OP", "-")
+                }
+                | T_DIV
+                {
+                    printRule("ARITH_OP", "/");
+                }
+                | T_ADD
+                {
+                    printRule("ARITH_OP", "+");
+                }
+                | T_MOD
+                {
+                    printRule("ARITH_OP", "\%\%");
+                }
+                | T_POW
+                {
+                    printRule("ARITH_OP", "^");
+                }
+                ;
+
+N_LOG_OP        : T_AND
+                {
+                    printRule("LOG_OP", "&");
+                }
+                | T_OR
+                {
+                    printRule("LOG_OP", "|");
+                }
+                ;
+
+N_REL_OP        : T_LT
+                {
+                    printRule("REL_OP", "<");
+                }
+                | T_GT
+                {
+                    printRule("REL_OP", ">");
+                }
+                | T_LE
+                {
+                    printRule("REL_OP", "<=");
+                }
+                | T_GE
+                {
+                    printRule("REL_OP", ">=");
+                }
+                | T_EQ
+                {
+                    printRule("REL_OP", "==");
+                }
+                | T_NE
+                {
+                    printRule("REL_OP", "!=");
+                }
+                ;
+
+N_UN_OP         : T_NOT
+                {
+                    printRule("UN_OP", "!");
+                }
+                ;
+
+/*
+TODO(anna): T_INDEX currently isn't a token,
+check with Dr. Leopold on this
+*/
+N_LIST_OP       : T_INDEX
+                {
+                    printRule("LIST_OP", "INDEX");
                 }
                 ;
 
