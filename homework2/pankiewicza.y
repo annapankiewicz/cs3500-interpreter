@@ -76,7 +76,7 @@ N_EXPR          : N_CONST
                 {
                     printRule("EXPR", "ASSIGNMENT_EXPR");
                 }
-                | N_PRINT_EXPR
+                | N_PRINT_EXPR /* no rule for this */
                 {
                     printRule("EXPR", "PRINT_EXPR");
                 }
@@ -160,6 +160,7 @@ N_WHILE_EXPR    : T_WHILE T_LPAREN N_EXPR T_RPAREN N_LOOP_EXPR
                 }
                 ;
 
+/* no rule for N_LIST */
 N_FOR_EXPR      : T_FOR T_LPAREN N_VAR T_IN N_LIST T_RPAREN N_LOOP_EXPR
                 {
                     printRule("FOR_EXPR", "FOR ( VAR IN LIST ) LOOP_EXPR");
@@ -374,6 +375,50 @@ check with Dr. Leopold on this
 N_LIST_OP       : T_INDEX
                 {
                     printRule("LIST_OP", "INDEX");
+                }
+                ;
+
+N_VAR           : N_ENTIRE_VAR
+                {
+                    printRule("VAR", "ENTIRE_VAR");
+                }
+                | N_LIST_VAR
+                {
+                    printRule("VAR", "LIST_VAR");
+                }
+                ;
+
+N_LIST_VAR      : N_SINGLE_ELEMENT
+                {
+                    printRule("LIST_VAR", "SINGLE_ELEMENT");
+                }
+                | N_RANGE_ELEMENTS
+                {
+                    printRule("LIST_VAR", "RANGE_ELEMENTS");
+                }
+                ;
+
+N_SINGLE_ELEMENT : T_IDENT T_LBRACKET T_LBRACKET N_EXPR T_RBRACKET T_RBRACKET
+                {
+                    printRule("SINGLE_ELEMENT", "IDENT [[ EXPR ]]");
+                }
+                ;
+
+N_RANGE_ELEMENTS : T_IDENT T_LBRACKET N_EXPR T_COMMA N_EXPR T_RBRACKET
+                {
+                    printRule("RANGE_ELEMENTS", "IDENT [ EXPR, EXPR ]");
+                }
+                ;
+
+N_ENTIRE_VAR    : N_VAR_IDENT
+                {
+                    printRule("ENTIRE_VAR", "VAR_IDENT");
+                }
+                ;
+
+N_VAR_IDENT     : T_IDENT
+                {
+                    printRule("VAR_IDENT", "IDENT");
                 }
                 ;
 
