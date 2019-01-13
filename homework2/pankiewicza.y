@@ -220,6 +220,71 @@ N_INPUT_EXPR    : T_READ T_LPAREN N_VAR T_RPAREN
                 }
                 ;
 
+N_FUNCTION_DEF  : T_FUNCTION T_LPAREN N_PARAM_LIST T_RPAREN N_COMPOUND_EXPR
+                {
+                    printRule("FUNCTION_DEF",
+                              "FUNCTION ( PARAM_LIST ) COMPOUND_EXPR");
+                }
+                ;
+
+N_PARAM_LIST    : N_PARAMS
+                {
+                    printRule("PARAM_LIST", "PARAMS");
+                }
+                | N_NO_PARAMS
+                {
+                    printRule("PARAM_LIST", "NO PARAMS");
+                }
+                ;
+
+N_NO_PARAMS     : /* epsilon */
+                {
+                    printRule("NO_PARAMS", "epsilon");
+                }
+                ;
+
+N_PARAMS        : T_IDENT
+                {
+                    printRule("PARAMS", "IDENT");
+                }
+                | T_IDENT T_COMMA N_PARAMS
+                {
+                    printRule("PARAMS", "IDENT, PARAMS");
+                }
+                ;
+
+N_FUNCTION_CALL : T_IDENT T_LPAREN N_ARG_LIST T_RPAREN
+                {
+                    printRule("FUNCTION_CALL", "IDENT ( ARG_LIST )");
+                }
+                ;
+
+N_ARG_LIST      : N_ARGS
+                {
+                    printRule("ARG_LIST", "ARGS");
+                }
+                | N_NO_ARGS
+                {
+                    printRule("ARG_LIST", "NO_ARGS");
+                }
+                ;
+
+N_NO_ARGS       : /* epsilon */
+                {
+                    printRule("NO_ARGS", "epsilon");
+                }
+                ;
+
+N_ARGS          : N_EXPR
+                {
+                    printRule("ARGS", "EXPR");
+                }
+                | N_EXPR T_COMMA N_ARGS
+                {
+                    printRule("ARGS", "EXPR, ARGS");
+                }
+                ;
+
 %%
 
 #include "lex.yy.c"
