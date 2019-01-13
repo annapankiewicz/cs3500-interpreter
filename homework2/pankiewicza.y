@@ -33,3 +33,86 @@ extern "C" {
 %token T_RBRACKET T_COLON T_SEMICOLON T_COMMA T_ADD T_SUB T_MULT T_DIV T_MOD
 %token T_POWER T_LT T_LE T_GT T_GE T_EQ T_NE T_NOT T_AND T_OR T_ASSIGN
 
+%start N_START
+
+%%
+
+N_START         : N_EXPR
+                {
+                    printRule("START", "EXPR");
+                    printf("\n---- Completed parsing ----\n\n");
+                    return 0;
+                }
+                ;
+N_EXPR          : N_CONST
+                {
+                    printRule("EXPR", "CONST");
+                }
+                | N_VAR
+                {
+                    printRule("EXPR", "VAR");
+                }
+                | N_IF_EXPR
+                {
+                    printRule("EXPR", "IF_EXPR");
+                }
+                | N_WHILE_EXPR
+                {
+                    printRule("EXPR", "WHILE_EXPR");
+                }
+                | N_FOR_EXPR
+                {
+                    printRule("EXPR", "FOR_EXPR");
+                }
+                | N_COMPOUND_EXPR
+                {
+                    printRule("EXPR", "COMPOUND_EXPR");
+                }
+                | N_ARITHLOGIC_EXPR
+                {
+                    printRule("EXPR", "ARITHLOGIC_EXPR");
+                }
+                | N_ASSIGNMENT_EXPR
+                {
+                    printRule("EXPR", "ASSIGNMENT_EXPR");
+                }
+                | N_PRINT_EXPR
+                {
+                    printRule("EXPR", "PRINT_EXPR");
+                }
+                | N_INPUT_EXPR
+                {
+                    printRule("EXPR", "INPUT_EXPR");
+                }
+                | N_FUNCTION_DEF
+                {
+                    printRule("EXPR", "FUNCTION_DEF");
+                }
+                | N_FUNCTION_CALL
+                {
+                    printRule("EXPR", "FUNCTION_CALL");
+                }
+                | N_QUIT_STMT
+                {
+                    printRule("EXPR", "QUIT_STMT");
+                }
+                ;
+
+%%
+
+#include "lex.yy.c"
+extern FILE *yyin;
+
+void printRule(const char *lhs, const char *rhs)
+{
+    printf("%s -> %s\n", lhs, rhs);
+    return;
+}
+
+int main() {
+    do {
+        yyparse();
+    } while (!feof(yyin));
+
+    return 0;
+}
