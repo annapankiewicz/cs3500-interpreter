@@ -192,6 +192,34 @@ N_NEXT_EXPR     : T_NEXT
                 }
                 ;
 
+N_ASSIGNMENT_EXPR : T_IDENT T_ASSIGN N_EXPR
+                {
+                    printRule("IDENT = EXPR");
+                }
+                ;
+
+N_QUIT_STMT     : T_QUIT T_LPAREN T_RPAREN
+                {
+                    printRule("QUIT_STMT", "QUIT()");
+                }
+                ;
+
+N_OUTPUT_EXPR   : T_PRINT N_EXPR
+                {
+                    printRule("OUTPUT_EXPR", "PRINT EXPR");
+                }
+                | T_CAT N_EXPR
+                {
+                    printRule("OUTPUT_EXPR", "CAT EXPR");
+                }
+                ;
+
+N_INPUT_EXPR    : T_READ T_LPAREN N_VAR T_RPAREN
+                {
+                    printRule("INPUT_EXPR", "READ ( VAR )");
+                }
+                ;
+
 %%
 
 #include "lex.yy.c"
