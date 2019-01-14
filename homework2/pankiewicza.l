@@ -146,8 +146,8 @@ COMMENT #+.*
 }
 
 ":" {
-    printTokenInfo("COLON", yytext);
-    return T_COLON;
+    printTokenInfo("INDEX", yytext);
+    return T_INDEX;
 }
 
 "," {
