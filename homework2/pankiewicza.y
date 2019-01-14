@@ -76,9 +76,9 @@ N_EXPR          : N_CONST
                 {
                     printRule("EXPR", "ASSIGNMENT_EXPR");
                 }
-                | N_PRINT_EXPR /* no rule for this */
+                | N_OUTPUT_EXPR
                 {
-                    printRule("EXPR", "PRINT_EXPR");
+                    printRule("EXPR", "OUTPUT_EXPR");
                 }
                 | N_INPUT_EXPR
                 {
