@@ -3,6 +3,13 @@
     flex pankiewicza.l 
     g++ lex.yy.c -o lexer
     lexer < testInput
+
+    *****
+    This is the first iteration of the syntax analyzer. Dr. Leopold has
+    rewritten the grammar to eliminate ambiguity and helpfully rewritten the
+    files to reflect that. However, I plan to keep this accessible if need be.
+    *****
+
 */
 
 %{
