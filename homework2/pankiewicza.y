@@ -81,8 +81,12 @@ N_EXPR          : N_CONST
                     printRule("EXPR", "OUTPUT_EXPR");
                 }
                 | N_INPUT_EXPR
-                {
+
                     printRule("EXPR", "INPUT_EXPR");
+                }
+                | N_LIST_EXPR
+                {
+                    printRule("EXPR", "LIST_EXPR");
                 }
                 | N_FUNCTION_DEF
                 {
@@ -92,9 +96,9 @@ N_EXPR          : N_CONST
                 {
                     printRule("EXPR", "FUNCTION_CALL");
                 }
-                | N_QUIT_STMT
+                | N_QUIT_EXPR
                 {
-                    printRule("EXPR", "QUIT_STMT");
+                    printRule("EXPR", "QUIT_EXPR");
                 }
                 ;
 
@@ -160,8 +164,7 @@ N_WHILE_EXPR    : T_WHILE T_LPAREN N_EXPR T_RPAREN N_LOOP_EXPR
                 }
                 ;
 
-/* no rule for N_LIST */
-N_FOR_EXPR      : T_FOR T_LPAREN N_VAR T_IN N_LIST T_RPAREN N_LOOP_EXPR
+N_FOR_EXPR      : T_FOR T_LPAREN N_VAR T_IN N_EXPR T_RPAREN N_LOOP_EXPR
                 {
                     printRule("FOR_EXPR", "FOR ( VAR IN LIST ) LOOP_EXPR");
                 }
@@ -193,15 +196,33 @@ N_NEXT_EXPR     : T_NEXT
                 }
                 ;
 
-N_ASSIGNMENT_EXPR : T_IDENT T_ASSIGN N_EXPR
+N_LIST_EXPR     : T_LIST T_LPAREN N_CONST_LIST T_RPAREN
                 {
-                    printRule("IDENT = EXPR");
+                    printRule("LIST_EXPR", "LIST ( CONST_LIST )");
                 }
                 ;
 
-N_QUIT_STMT     : T_QUIT T_LPAREN T_RPAREN
+N_CONST_LIST    : N_CONST T_COMMA N_CONST_LIST
                 {
-                    printRule("QUIT_STMT", "QUIT()");
+                    printRule("CONST_LIST", "CONST, CONST_LIST");
+                }
+                | N_CONST
+                {
+                    printRule("CONST_LIST", "CONST");
+                }
+                ;
+
+N_ASSIGNMENT_EXPR : T_IDENT T_ASSIGN N_EXPR
+                {
+                    printRule("ASSIGNMENT_EXPR", "IDENT = EXPR");
+                }
+                ;
+
+
+
+N_QUIT_EXPR     : T_QUIT T_LPAREN T_RPAREN
+                {
+                    printRule("QUIT_EXPR", "QUIT()");
                 }
                 ;
 
@@ -378,19 +399,9 @@ N_VAR           : N_ENTIRE_VAR
                 {
                     printRule("VAR", "ENTIRE_VAR");
                 }
-                | N_LIST_VAR
+                | N_SINGLE_ELEMENT
                 {
                     printRule("VAR", "LIST_VAR");
-                }
-                ;
-
-N_LIST_VAR      : N_SINGLE_ELEMENT
-                {
-                    printRule("LIST_VAR", "SINGLE_ELEMENT");
-                }
-                | N_RANGE_ELEMENTS
-                {
-                    printRule("LIST_VAR", "RANGE_ELEMENTS");
                 }
                 ;
 
@@ -400,21 +411,9 @@ N_SINGLE_ELEMENT : T_IDENT T_LBRACKET T_LBRACKET N_EXPR T_RBRACKET T_RBRACKET
                 }
                 ;
 
-N_RANGE_ELEMENTS : T_IDENT T_LBRACKET N_EXPR T_COMMA N_EXPR T_RBRACKET
+N_ENTIRE_VAR    : T_IDENT
                 {
-                    printRule("RANGE_ELEMENTS", "IDENT [ EXPR, EXPR ]");
-                }
-                ;
-
-N_ENTIRE_VAR    : N_VAR_IDENT
-                {
-                    printRule("ENTIRE_VAR", "VAR_IDENT");
-                }
-                ;
-
-N_VAR_IDENT     : T_IDENT
-                {
-                    printRule("VAR_IDENT", "IDENT");
+                    printRule("ENTIRE_VAR", "IDENT");
                 }
                 ;
 
