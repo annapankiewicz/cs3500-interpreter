@@ -31,7 +31,7 @@
 #define T_RBRACE        23
 #define T_LBRACKET      24
 #define T_RBRACKET      25
-#define T_INDEX         26
+#define T_LIST          26
 #define T_SEMICOLON     27
 #define T_COMMA         28
 #define T_ADD           29
@@ -50,7 +50,6 @@
 #define T_AND           42
 #define T_OR            43
 #define T_ASSIGN        44
-#define T_LIST          45
 
 int num_lines = 0;
 
@@ -188,11 +187,6 @@ COMMENT #+.*
 ";" {
     printTokenInfo("SEMICOLON", yytext);
     return T_SEMICOLON;
-}
-
-":" {
-    printTokenInfo("INDEX", yytext);
-    return T_INDEX;
 }
 
 "," {

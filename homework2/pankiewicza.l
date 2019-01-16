@@ -145,11 +145,6 @@ COMMENT #+.*
     return T_SEMICOLON;
 }
 
-":" {
-    printTokenInfo("INDEX", yytext);
-    return T_INDEX;
-}
-
 "," {
     printTokenInfo("COMMA", yytext);
     return T_COMMA;
