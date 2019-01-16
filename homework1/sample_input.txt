@@ -2,7 +2,7 @@
 while TRUE "nice" ^99*
 # how about a comment
 print if else 7.8245 >= 7
--999 /== FALSE )]&
+-999 /== FALSE )]& list("one", 2, 3)
 { " hello" > 3 + 4 }
 "a in
 bc" .097 next next_please <

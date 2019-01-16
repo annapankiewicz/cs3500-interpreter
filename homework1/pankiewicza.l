@@ -50,6 +50,7 @@
 #define T_AND           42
 #define T_OR            43
 #define T_ASSIGN        44
+#define T_LIST          45
 
 int num_lines = 0;
 
@@ -267,6 +268,11 @@ COMMENT #+.*
 "read" {
     printTokenInfo("READ", yytext);
     return T_READ;
+}
+
+"list" {
+    printTokenInfo("LIST", yytext);
+    return T_LIST;
 }
 
 {STRCONST} {

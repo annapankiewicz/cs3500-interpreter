@@ -225,6 +225,11 @@ COMMENT #+.*
     return T_READ;
 }
 
+"list" {
+    printTokenInfo("LIST", yytext);
+    return T_LIST;
+}
+
 {STRCONST} {
     printTokenInfo("STRCONST", yytext);
     return T_STRCONST;
