@@ -240,7 +240,7 @@ COMMENT #+.*
 }
 
 {NEWLINE} {
-    num_lines++;
+    line_num++;
 }
 
 {WSPACE} {}

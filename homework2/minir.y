@@ -12,7 +12,6 @@
 #include <stdio.h>
 
 int line_num = 1;
-int num_lines = 0;
 
 void printTokenInfo(const char* token_type, const char* lexeme);
 
@@ -225,7 +224,7 @@ N_IF_EXPR       : T_IF T_LPAREN N_EXPR T_RPAREN N_EXPR
                 | T_IF T_LPAREN N_EXPR T_RPAREN N_EXPR T_ELSE
                   N_EXPR
                 {
-                    printRule("IF_EXPR", "IF ( EXPR ) ");
+                    printRule("IF_EXPR", "IF ( EXPR ) ELSE EXPR");
                 }
                 ;
 
@@ -419,11 +418,11 @@ N_MULT_OP      : T_MULT
                 }
                 | T_MOD
                 {
-                    printRule("ARITH_OP", "\%\%");
+                    printRule("MULT_OP", "\%\%");
                 }
                 | T_POW
                 {
-                    printRule("ARITH_OP", "^");
+                    printRule("MULT_OP", "^");
                 }
                 ;
 
@@ -459,7 +458,7 @@ N_VAR           : N_ENTIRE_VAR
                 }
                 | N_SINGLE_ELEMENT
                 {
-                    printRule("VAR", "LIST_VAR");
+                    printRule("VAR", "SINGLE_ELEMENT");
                 }
                 ;
 
