@@ -1,0 +1,12 @@
+if (4^7) {
+    banana = function(x, y, z) {
+	x = 2;
+	y = 3;
+	z = "BANANA";
+	quit()
+    }
+} else {
+    apple = function() {
+	print("fruit!")
+    }
+}

@@ -1,0 +1,6 @@
+if (TRUE) {
+    cranberry(one, two, three)
+} else {
+    blueberry();
+    read(strawberry)
+}

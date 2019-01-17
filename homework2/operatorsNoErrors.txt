@@ -1,0 +1,2 @@
+fifty_five = ((((3^(4>3) != (fifty %% seventy)))) /
+(7 <= (!steak | (chicken == bird)))) >= (9 - ( TRUE & (watermelon[[3]])) * (taco < (tacos^2)))
