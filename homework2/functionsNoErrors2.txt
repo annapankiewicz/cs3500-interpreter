@@ -1,6 +1,7 @@
 if (TRUE) {
     cranberry(one, two, three)
-} else {
+} else { # this is a comment
     blueberry();
+    watermelon = 7.894;
     read(strawberry)
 }
