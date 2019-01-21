@@ -107,6 +107,7 @@ N_EXPR          : N_IF_EXPR
                 | N_QUIT_EXPR
                 {
                     printRule("EXPR", "QUIT_EXPR");
+                    exit(1);
                 }
                 ;
 
