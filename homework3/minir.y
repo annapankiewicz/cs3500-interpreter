@@ -10,8 +10,21 @@
 
 %{
 #include <stdio.h>
+#include <stdlib.h>
+#include <iostream>
+#include <string>
+#include <stack>
+#include "SymbolTable.h"
+using namespace std;
 
 int line_num = 1;
+
+stack<SYMBOL_TABLE> scopeStack; \\ stack of scope hashtables
+
+void beginScope();
+void endScope();
+void cleanUp();
+bool findEntryInAnyScope(const string the_name);
 
 void printTokenInfo(const char* token_type, const char* lexeme);
 
@@ -20,6 +33,8 @@ void printRule(const char *, const char *);
 int yyerror(const char *s) 
 {
     printf("Line %d: %s\n", line_num, s);
+    cleanUp();
+    exit(1);
 }
 
 extern "C" 
@@ -30,6 +45,10 @@ extern "C"
 }
 
 %}
+
+%union {
+    char* text;
+};
 
 %token T_IDENT T_INTCONST T_FLOATCONST T_UNKNOWN T_STRCONST 
 %token T_IF T_ELSE
@@ -56,6 +75,7 @@ extern "C"
 N_START         : N_EXPR
                 {
                     printRule("START", "EXPR");
+                    endScope();
                     printf("\n---- Completed parsing ----\n\n");
                     return 0;
                 }
@@ -75,6 +95,7 @@ N_EXPR          : N_IF_EXPR
                 | N_COMPOUND_EXPR
                 {
                     printRule("EXPR", "COMPOUND_EXPR");
+                    endScope();
                 }
                 | N_ARITHLOGIC_EXPR
                 {
@@ -107,6 +128,7 @@ N_EXPR          : N_IF_EXPR
                 | N_QUIT_EXPR
                 {
                     printRule("EXPR", "QUIT_EXPR");
+                    exit(1);
                 }
                 ;
 
@@ -322,12 +344,16 @@ N_INPUT_EXPR    : T_READ T_LPAREN N_VAR T_RPAREN
                 }
                 ;
 
-N_FUNCTION_DEF  : T_FUNCTION T_LPAREN N_PARAM_LIST T_RPAREN 
-                  N_COMPOUND_EXPR
+N_FUNCTION_DEF  : T_FUNCTION T_LPAREN
+                {
+                    beginScope();
+                }
+                N_PARAM_LIST T_RPAREN N_COMPOUND_EXPR
                 {
                     printRule("FUNCTION_DEF",
                               "FUNCTION ( PARAM_LIST )"
                               " COMPOUND_EXPR");
+                    endScope();
                 }
                 ;
 
@@ -492,8 +518,19 @@ void printRule(const char *lhs, const char *rhs)
     return;
 }
 
+void beginScope() {
+    scopeStack.push(SYMBOL_TABLE());
+    printf("\n___Entering new scope...\n\n");
+}
+
+void endScope() {
+    scopeStack.pop();
+    printf("\n___Exiting scope...\n\n");
+}
+
 int main() 
 {
+    beginScope();
     do {
         yyparse();
     } while (!feof(yyin));

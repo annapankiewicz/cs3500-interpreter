@@ -36,6 +36,7 @@ COMMENT #+.*
 
 "{" {
     printTokenInfo("LBRACE", yytext);
+    beginScope();
     return T_LBRACE;
 }
 
