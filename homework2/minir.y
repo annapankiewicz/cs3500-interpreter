@@ -237,7 +237,7 @@ N_WHILE_EXPR    : T_WHILE T_LPAREN N_EXPR T_RPAREN N_LOOP_EXPR
                 }
                 ;
 
-N_FOR_EXPR      : T_FOR T_LPAREN N_ENTIRE_VAR T_IN N_EXPR T_RPAREN
+N_FOR_EXPR      : T_FOR T_LPAREN T_IDENT T_IN N_EXPR T_RPAREN
                   N_LOOP_EXPR
                 {
                     printRule("FOR_EXPR", 
@@ -290,14 +290,22 @@ N_CONST_LIST    : N_CONST T_COMMA N_CONST_LIST
                 }
                 ;
 
-N_ASSIGNMENT_EXPR : N_VAR T_ASSIGN N_EXPR
+N_ASSIGNMENT_EXPR : T_IDENT N_INDEX T_ASSIGN N_EXPR
                 {
                     printRule("ASSIGNMENT_EXPR", 
-                              "VAR = EXPR");
+                              "IDENT INDEX T_ASSIGN N_EXPR");
                 }
                 ;
 
-
+N_INDEX :       T_LBRACKET T_LBRACKET N_EXPR T_RBRACKET T_RBRACKET
+			    {
+                    printRule("N_INDEX", " [[ EXPR ]]");
+			    }
+			    | /* epsilon */
+                {
+                    printRule("N_INDEX", " epsilon");
+                }
+                ;
 
 N_QUIT_EXPR     : T_QUIT T_LPAREN T_RPAREN
                 {

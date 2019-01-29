@@ -98,7 +98,6 @@ N_EXPR          : N_IF_EXPR
                 | N_COMPOUND_EXPR
                 {
                     printRule("EXPR", "COMPOUND_EXPR");
-                    endScope();
                 }
                 | N_ARITHLOGIC_EXPR
                 {
@@ -261,7 +260,7 @@ N_WHILE_EXPR    : T_WHILE T_LPAREN N_EXPR T_RPAREN N_LOOP_EXPR
                 }
                 ;
 
-N_FOR_EXPR      : T_FOR T_LPAREN N_ENTIRE_VAR T_IN N_EXPR T_RPAREN
+N_FOR_EXPR      : T_FOR T_LPAREN T_IDENT T_IN N_EXPR T_RPAREN
                   N_LOOP_EXPR
                 {
                     printRule("FOR_EXPR", 
@@ -314,18 +313,30 @@ N_CONST_LIST    : N_CONST T_COMMA N_CONST_LIST
                 }
                 ;
 
-N_ASSIGNMENT_EXPR : N_VAR T_ASSIGN
-                {
-                    assignment_statement = true;
-                }
-                N_EXPR
+N_ASSIGNMENT_EXPR : T_IDENT N_INDEX T_ASSIGN N_EXPR
                 {
                     printRule("ASSIGNMENT_EXPR", 
-                              "VAR = EXPR");
+                              "IDENT INDEX T_ASSIGN N_EXPR");
+                    string lexeme = string($1);
+                    printf("___Adding %s to symbol table\n", $1);
+                    bool success = scopeStack.top().addEntry(
+                        SYMBOL_TABLE_ENTRY(lexeme, UNDEFINED));
+                    if(!success) {
+                      yyerror("Multiply defined identifier");
+                      return(0);
+                    }
                 }
                 ;
 
-
+N_INDEX :       T_LBRACKET T_LBRACKET N_EXPR T_RBRACKET T_RBRACKET
+			    {
+                    printRule("N_INDEX", " [[ EXPR ]]");
+			    }
+			    | /* epsilon */
+                {
+                    printRule("N_INDEX", " epsilon");
+                }
+                ;
 
 N_QUIT_EXPR     : T_QUIT T_LPAREN T_RPAREN
                 {
@@ -526,24 +537,10 @@ N_SINGLE_ELEMENT : T_IDENT T_LBRACKET T_LBRACKET N_EXPR
 N_ENTIRE_VAR    : T_IDENT
                 {
                     printRule("ENTIRE_VAR", "IDENT");
-                    if(assignment_statement)
+                    if(!findEntryInAnyScope($1))
                     {
-                        if(!findEntryInAnyScope($1))
-                        {
-                            yyerror("Undefined identifier");
-                            assignment_statement = false;
-                            return(0);
-                        }
-                    }
-                    else {
-                        string lexeme = string($1);
-                        printf("___Adding %s to symbol table\n", $1);
-                        bool success = scopeStack.top().addEntry(
-                            SYMBOL_TABLE_ENTRY(lexeme, UNDEFINED));
-                        if(!success) {
-                            yyerror("Multiply defined identifier");
-                            return(0);
-                        }
+                        yyerror("Undefined identifier");
+                        return(0);
                     }
                 }
                 ;
