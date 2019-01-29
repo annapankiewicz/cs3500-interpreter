@@ -237,7 +237,7 @@ N_WHILE_EXPR    : T_WHILE T_LPAREN N_EXPR T_RPAREN N_LOOP_EXPR
                 }
                 ;
 
-N_FOR_EXPR      : T_FOR T_LPAREN N_VAR T_IN N_EXPR T_RPAREN
+N_FOR_EXPR      : T_FOR T_LPAREN N_ENTIRE_VAR T_IN N_EXPR T_RPAREN
                   N_LOOP_EXPR
                 {
                     printRule("FOR_EXPR", 

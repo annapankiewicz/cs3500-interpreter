@@ -8,7 +8,7 @@
 %{
 #define T_IDENT         1
 #define T_INTCONST      2
-#define T_FLOATCONST    3  
+#define T_FLOATCONST    3
 #define T_UNKNOWN       4
 #define T_STRCONST      5
 #define T_IF            6
@@ -68,7 +68,7 @@ IDENT ({LETTER}|\_)+({LETTER}|{DIGIT}|\_)*
 FLOATCONST (\+|-)?(({DIGIT})*\.({DIGIT})+)
 INTCONST (\+|-)?{DIGIT}+
 
-STRCONST (\")({LETTER}|{DIGIT}|{WSPACE}|.)+(\")
+STRCONST (\")[^\"\t\v\r\n]+(\")
 
 COMMENT #+.*
 

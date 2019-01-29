@@ -18,7 +18,7 @@ IDENT ({LETTER}|\_)+({LETTER}|{DIGIT}|\_)*
 FLOATCONST (\+|-)?(({DIGIT})*\.({DIGIT})+)
 INTCONST (\+|-)?{DIGIT}+
 
-STRCONST (\")({LETTER}|{DIGIT}|{WSPACE}|.)+(\")
+STRCONST (\")[^\"\t\v\r\n]+(\")
 
 COMMENT #+.*
 
