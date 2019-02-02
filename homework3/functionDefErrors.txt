@@ -1,0 +1,6 @@
+red = function(black, gray, white) {
+    black = "one";
+    gray = "_seventeen";
+    white = "at least six";
+    green = yellow
+}

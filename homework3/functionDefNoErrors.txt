@@ -1,0 +1,11 @@
+teal = function(start, middle, end)
+{
+    start = middle;
+    middle = end;
+    end = 7;
+    if (17-start > 0) {
+        print(middle + end)
+    } else {
+	print(start)
+    }
+}

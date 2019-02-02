@@ -1,0 +1,7 @@
+{
+    found = function(final) {
+	x = 73;
+	final = FALSE
+    };
+    print(x) # x should no longer be in symbol table
+}

@@ -1,0 +1,5 @@
+{
+    kitten = 3;
+    second = kitten + 12;
+    third = (7 > 9) + (55 * kitten)
+}
