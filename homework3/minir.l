@@ -19,8 +19,8 @@ FLOATCONST (\+|-)?(({DIGIT})*\.({DIGIT})+)
 INTCONST (\+|-)?{DIGIT}+
 
 STRCONST (\")[^\"\t\v\r\n]+(\")
-
 COMMENT #+.*
+
 
 %%
 

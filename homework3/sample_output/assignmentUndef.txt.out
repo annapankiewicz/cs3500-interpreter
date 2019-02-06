@@ -1,0 +1,9 @@
+
+___Entering new scope...
+
+TOKEN: IDENT 		 LEXEME: mrPeanutButter
+TOKEN: ASSIGN 		 LEXEME: =
+INDEX ->  epsilon
+TOKEN: IDENT 		 LEXEME: bojack
+ENTIRE_VAR -> IDENT
+Line 2: Undefined identifier

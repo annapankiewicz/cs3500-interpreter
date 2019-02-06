@@ -1,0 +1,24 @@
+
+___Entering new scope...
+
+TOKEN: IDENT 		 LEXEME: banana
+TOKEN: ASSIGN 		 LEXEME: =
+INDEX ->  epsilon
+TOKEN: FUNCTION 		 LEXEME: function
+TOKEN: LPAREN 		 LEXEME: (
+
+___Entering new scope...
+
+TOKEN: IDENT 		 LEXEME: x
+TOKEN: COMMA 		 LEXEME: ,
+TOKEN: IDENT 		 LEXEME: y
+TOKEN: COMMA 		 LEXEME: ,
+TOKEN: IDENT 		 LEXEME: x
+TOKEN: RPAREN 		 LEXEME: )
+PARAMS -> IDENT
+___Adding x to symbol table
+PARAMS -> IDENT, PARAMS
+___Adding y to symbol table
+PARAMS -> IDENT, PARAMS
+___Adding x to symbol table
+Line 1: Multiply defined identifier

@@ -293,17 +293,17 @@ N_CONST_LIST    : N_CONST T_COMMA N_CONST_LIST
 N_ASSIGNMENT_EXPR : T_IDENT N_INDEX T_ASSIGN N_EXPR
                 {
                     printRule("ASSIGNMENT_EXPR", 
-                              "IDENT INDEX T_ASSIGN N_EXPR");
+                              "IDENT INDEX ASSIGN EXPR");
                 }
                 ;
 
 N_INDEX :       T_LBRACKET T_LBRACKET N_EXPR T_RBRACKET T_RBRACKET
 			    {
-                    printRule("N_INDEX", " [[ EXPR ]]");
+                    printRule("INDEX", " [[ EXPR ]]");
 			    }
 			    | /* epsilon */
                 {
-                    printRule("N_INDEX", " epsilon");
+                    printRule("INDEX", " epsilon");
                 }
                 ;
 

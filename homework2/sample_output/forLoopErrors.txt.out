@@ -1,0 +1,5 @@
+TOKEN: FOR 		 LEXEME: for
+TOKEN: LPAREN 		 LEXEME: (
+TOKEN: IDENT 		 LEXEME: x
+TOKEN: LBRACKET 		 LEXEME: [
+Line 1: syntax error
