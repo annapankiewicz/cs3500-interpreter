@@ -144,7 +144,7 @@ N_CONST         : T_INTCONST
                 }
                 | T_FLOATCONST
                 {
-                    printRule("CONST", "STRCONST");
+                    printRule("CONST", "FLOATCONST");
                 }
                 | T_TRUE
                 {
@@ -248,14 +248,14 @@ N_IF_EXPR       : T_IF T_LPAREN N_EXPR T_RPAREN N_EXPR
                 | T_IF T_LPAREN N_EXPR T_RPAREN N_EXPR T_ELSE
                   N_EXPR
                 {
-                    printRule("IF_EXPR", "IF ( EXPR ) ELSE EXPR");
+                    printRule("IF_EXPR", "IF ( EXPR ) EXPR ELSE EXPR");
                 }
                 ;
 
 N_WHILE_EXPR    : T_WHILE T_LPAREN N_EXPR T_RPAREN N_LOOP_EXPR
                 {
                     printRule("WHILE_EXPR", 
-                              "WHILE ( VAR IN LIST ) "
+                              "WHILE ( EXPR ) "
                               "LOOP_EXPR");
                 }
                 ;
@@ -264,7 +264,7 @@ N_FOR_EXPR      : T_FOR T_LPAREN T_IDENT T_IN N_EXPR T_RPAREN
                   N_LOOP_EXPR
                 {
                     printRule("FOR_EXPR", 
-                              "FOR ( VAR IN LIST ) "
+                              "FOR ( IDENT IN EXPR ) "
                               "LOOP_EXPR");
                 }
                 ;
