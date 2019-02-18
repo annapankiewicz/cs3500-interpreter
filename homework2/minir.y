@@ -37,7 +37,7 @@ extern "C"
 %token T_TRUE T_FALSE T_QUIT
 %token T_PRINT T_CAT T_READ T_LPAREN T_RPAREN T_LBRACE 
 %token T_RBRACE T_LBRACKET
-%token T_RBRACKET T_SEMICOLON T_COMMA T_ADD T_SUB 
+%token T_RBRACKET T_SEMICOLON T_COMMA T_ADD T_SUB
 %token T_MULT T_DIV T_MOD
 %token T_POW T_LT T_LE T_GT T_GE T_EQ T_NE T_NOT T_AND 
 %token T_OR T_ASSIGN T_LIST
@@ -346,7 +346,7 @@ N_PARAM_LIST    : N_PARAMS
                 }
                 | N_NO_PARAMS
                 {
-                    printRule("PARAM_LIST", "NO PARAMS");
+                    printRule("PARAM_LIST", "NO_PARAMS");
                 }
                 ;
 

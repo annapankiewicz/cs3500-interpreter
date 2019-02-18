@@ -80,7 +80,7 @@ COMMENT #+.*
 }
 
 "^" {
-    printTokenInfo("POWER", yytext);
+    printTokenInfo("POW", yytext);
     return T_POW;
 }
 
