@@ -18,14 +18,15 @@
 using namespace std;
 
 int line_num = 1;
-bool assignment_statement = false;
+int num_params = 0;
+int num_exprs = 0;
 
 stack<SYMBOL_TABLE> scopeStack; // stack of scope hashtables
 
 void beginScope();
 void endScope();
 void cleanUp();
-bool findEntryInAnyScope(const string the_name);
+TYPE_INFO findEntryInAnyScope(const string the_name);
 
 void printTokenInfo(const char* token_type, const char* lexeme);
 
@@ -319,8 +320,9 @@ N_ASSIGNMENT_EXPR : T_IDENT N_INDEX T_ASSIGN N_EXPR
                               "IDENT INDEX ASSIGN EXPR");
                     string lexeme = string($1);
                     printf("___Adding %s to symbol table\n", $1);
-                    bool success = scopeStack.top().addEntry(
-                        SYMBOL_TABLE_ENTRY(lexeme, UNDEFINED));
+                    // TODO(anna): adding this in as null until later
+                    bool success = scopeStack.top().addEntry(SYMBOL_TABLE_ENTRY
+                        (lexeme, {NULL_TYPE, NOT_APPLICABLE, NOT_APPLICABLE}));
                     if(!success) {
                       yyerror("Multiply defined identifier");
                       return(0);
@@ -396,8 +398,9 @@ N_PARAMS        : T_IDENT
                     printRule("PARAMS", "IDENT");
                     string lexeme = string($1);
                     printf("___Adding %s to symbol table\n", $1);
-                    bool success = scopeStack.top().addEntry(
-                        SYMBOL_TABLE_ENTRY(lexeme, UNDEFINED));
+                    // assuming params are ints according to assignment description
+                    bool success = scopeStack.top().addEntry(SYMBOL_TABLE_ENTRY
+                        (lexeme,{INT, NOT_APPLICABLE, NOT_APPLICABLE}));
                     if(!success) {
                         yyerror("Multiply defined identifier");
                         return(0);
@@ -408,8 +411,9 @@ N_PARAMS        : T_IDENT
                     printRule("PARAMS", "IDENT, PARAMS");
                     string lexeme = string($1);
                     printf("___Adding %s to symbol table\n", $1);
-                    bool success = scopeStack.top().addEntry(
-                        SYMBOL_TABLE_ENTRY(lexeme, UNDEFINED));
+                    // assuming params are ints according to assignment description
+                    bool success = scopeStack.top().addEntry(SYMBOL_TABLE_ENTRY
+                        (lexeme, {INT, NOT_APPLICABLE, NOT_APPLICABLE}));
                     if(!success) {
                         yyerror("Multiply defined identifier");
                         return(0);
@@ -527,7 +531,9 @@ N_SINGLE_ELEMENT : T_IDENT T_LBRACKET T_LBRACKET N_EXPR
                 {
                     printRule("SINGLE_ELEMENT", "IDENT"
                               " [[ EXPR ]]");
-                    if (!findEntryInAnyScope($1)) {
+                    string ident = string($1);
+                    TYPE_INFO exprTypeInfo = findEntryInAnyScope(ident);
+                    if(exprTypeInfo.type == UNDEFINED) {
                         yyerror("Undefined identifier");
                         return(0);
                     }
@@ -537,8 +543,9 @@ N_SINGLE_ELEMENT : T_IDENT T_LBRACKET T_LBRACKET N_EXPR
 N_ENTIRE_VAR    : T_IDENT
                 {
                     printRule("ENTIRE_VAR", "IDENT");
-                    if(!findEntryInAnyScope($1))
-                    {
+                    string ident = string($1);
+                    TYPE_INFO exprTypeInfo = findEntryInAnyScope(ident);
+                    if(exprTypeInfo.type == UNDEFINED) {
                         yyerror("Undefined identifier");
                         return(0);
                     }
@@ -580,17 +587,19 @@ void cleanUp() {
     }
 }
 
-bool findEntryInAnyScope(const string the_name) {
-    if (scopeStack.empty()) return(false);
-    bool found = scopeStack.top().findEntry(the_name);
-    if (found)
-        return(true);
-    else {
+TYPE_INFO findEntryInAnyScope(const string the_name) {
+    TYPE_INFO info = {UNDEFINED, NOT_APPLICABLE, NOT_APPLICABLE};
+    if (scopeStack.empty()) return(info);
+    info = scopeStack.top().findEntry(the_name);
+    if (info.type != UNDEFINED) {
+        return(info);
+    }
+    else { // check in "next higher" scope
         SYMBOL_TABLE symbolTable = scopeStack.top();
         scopeStack.pop();
-        found = findEntryInAnyScope(the_name);
-        scopeStack.push(symbolTable); // restore stack to original state
-        return(found);
+        info = findEntryInAnyScope(the_name);
+        scopeStack.push(symbolTable); // restore the stack
+        return(info);
     }
 }
 
