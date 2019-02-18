@@ -1,0 +1,16 @@
++1234 |"hello" $what ;;
+while TRUE "nice" ^99*
+# how about a comment
+print if else 7.8245 >= 7
+-999 /== FALSE )]& list("one", 2, 3)
+{ " hello" > 3 +}
+"a in
+bc" .097 next next_please <
+!= _identifier_two - 5 +6
+for ( break ) function =!
+!TRUE cat =B0Jack "read" true then read
+%%45 : i=2, <= 9 # comment time
+[quit -000000000.1234567890
+"BoJack""Horseman"
+
+
