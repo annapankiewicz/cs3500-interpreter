@@ -50,6 +50,7 @@ extern "C"
 
 %union {
     char* text;
+    TYPE_INFO typeInfo;
 };
 
 %token T_IDENT T_INTCONST T_FLOATCONST T_UNKNOWN T_STRCONST 
@@ -64,6 +65,8 @@ extern "C"
 %token T_OR T_ASSIGN T_LIST
 
 %type <text> T_IDENT
+
+%type <typeInfo> N_CONST N_EXPR N_COMPOUND_EXPR N_EXPR_LIST N_IF_EXPR
 
 /*
  *  To eliminate ambiguity in if/else
@@ -213,27 +216,50 @@ N_COMPOUND_EXPR : T_LBRACE N_EXPR N_EXPR_LIST T_RBRACE
                 {
                     printRule("COMPOUND_EXPR",
                               "{ EXPR EXPR_LIST }");
+                    $$.type = $2.type;
+                    $$.numParams = $2.numParams;
+                    $$.returnType = $2.returnType;
                 }
                 ;
 
 N_EXPR_LIST     : T_SEMICOLON N_EXPR N_EXPR_LIST
                 {
                     printRule("EXPR_LIST", "; EXPR EXPR_LIST");
+                    $$.type = $2.type;
+                    $$.numParams = $2.numParams;
+                    $$.returnType = $2.returnType;
                 }
                 | /* epsilon */
                 {
                     printRule("EXPR_LIST", "epsilon");
+                    // worry about this type later
                 }
                 ;
 
 N_IF_EXPR       : T_IF T_LPAREN N_EXPR T_RPAREN N_EXPR
                 {
                     printRule("IF_EXPR", "IF ( EXPR ) EXPR");
+                    if(($3.type == FUNCTION) || ($3.type == LIST)) {
+                        yyerror("Arg 1 cannot be function or list");
+                    }
+                    if($5.type == FUNCTION) {
+                        yyerror("Arg 2 cannot be function");
+                    }
+
+                    $$.type = $3.type ^ $5.type;
+                    $$.numParams = NOT_APPLICABLE;
+                    $$.returnType = NOT_APPLICABLE;
                 }
                 | T_IF T_LPAREN N_EXPR T_RPAREN N_EXPR T_ELSE
                   N_EXPR
                 {
                     printRule("IF_EXPR", "IF ( EXPR ) EXPR ELSE EXPR");
+                    if(($3.type == FUNCTION) || ($3.type == LIST)) {
+                        yyerror("Arg 1 cannot be function or list");
+                    }
+                    if($5.type == FUNCTION) {
+                        yyerror("Arg 2 cannot be function");
+                    }
                 }
                 ;
 
