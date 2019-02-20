@@ -338,6 +338,9 @@ N_LIST_EXPR     : T_LIST T_LPAREN N_CONST_LIST T_RPAREN
                 {
                     printRule("LIST_EXPR", 
                               "LIST ( CONST_LIST )");
+                    $$.type = LIST;
+                    $$.numParams = NOT_APPLICABLE;
+                    $$.returnType = NOT_APPLICABLE;
                 }
                 ;
 
@@ -358,13 +361,15 @@ N_ASSIGNMENT_EXPR : T_IDENT N_INDEX T_ASSIGN N_EXPR
                               "IDENT INDEX ASSIGN EXPR");
                     string lexeme = string($1);
                     printf("___Adding %s to symbol table\n", $1);
-                    // TODO(anna): adding this in as null until later
                     bool success = scopeStack.top().addEntry(SYMBOL_TABLE_ENTRY
-                        (lexeme, {NULL_TYPE, NOT_APPLICABLE, NOT_APPLICABLE}));
+                        (lexeme, {$4.type, NOT_APPLICABLE, NOT_APPLICABLE}));
                     if(!success) {
                       yyerror("Multiply defined identifier");
                       return(0);
                     }
+                    $$.type = $4.type;
+                    $$.numParams = $4.numParams;
+                    $$.returnType = $4.returnType;
                 }
                 ;
 
@@ -381,6 +386,9 @@ N_INDEX :       T_LBRACKET T_LBRACKET N_EXPR T_RBRACKET T_RBRACKET
 N_QUIT_EXPR     : T_QUIT T_LPAREN T_RPAREN
                 {
                     printRule("QUIT_EXPR", "QUIT()");
+                    $$.type = NULL_TYPE;
+                    $$.numParams = NOT_APPLICABLE;
+                    $$.returnType = NOT_APPLICABLE;
                 }
                 ;
 
