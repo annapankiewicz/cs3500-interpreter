@@ -18,8 +18,8 @@
 using namespace std;
 
 int line_num = 1;
-int num_params = 0;
-int num_exprs = 0;
+int numParams = 0;
+int numExprs = 0;
 
 stack<SYMBOL_TABLE> scopeStack; // stack of scope hashtables
 
@@ -87,50 +87,86 @@ N_START         : N_EXPR
 N_EXPR          : N_IF_EXPR
                 {
                     printRule("EXPR", "IF_EXPR");
+                    $$.type = $1.type;
+                    $$.numParams = $1.numParams;
+                    $$.returnType = $1.returnType;
                 }
                 | N_WHILE_EXPR
                 {
                     printRule("EXPR", "WHILE_EXPR");
+                    $$.type = $1.type;
+                    $$.numParams = $1.numParams;
+                    $$.returnType = $1.returnType;
                 }
                 | N_FOR_EXPR
                 {
                     printRule("EXPR", "FOR_EXPR");
+                    $$.type = $1.type;
+                    $$.numParams = $1.numParams;
+                    $$.returnType = $1.returnType;
                 }
                 | N_COMPOUND_EXPR
                 {
                     printRule("EXPR", "COMPOUND_EXPR");
+                    $$.type = $1.type;
+                    $$.numParams = $1.numParams;
+                    $$.returnType = $1.returnType;
                 }
                 | N_ARITHLOGIC_EXPR
                 {
                     printRule("EXPR", "ARITHLOGIC_EXPR");
+                    $$.type = $1.type;
+                    $$.numParams = $1.numParams;
+                    $$.returnType = $1.returnType;
                 }
                 | N_ASSIGNMENT_EXPR
                 {
                     printRule("EXPR", "ASSIGNMENT_EXPR");
+                    $$.type = $1.type;
+                    $$.numParams = $1.numParams;
+                    $$.returnType = $1.returnType;
                 }
                 | N_OUTPUT_EXPR
                 {
                     printRule("EXPR", "OUTPUT_EXPR");
+                    $$.type = $1.type;
+                    $$.numParams = $1.numParams;
+                    $$.returnType = $1.returnType;
                 }
                 | N_INPUT_EXPR
                 {
                     printRule("EXPR", "INPUT_EXPR");
+                    $$.type = $1.type;
+                    $$.numParams = $1.numParams;
+                    $$.returnType = $1.returnType;
                 }
                 | N_LIST_EXPR
                 {
                     printRule("EXPR", "LIST_EXPR");
+                    $$.type = $1.type;
+                    $$.numParams = $1.numParams;
+                    $$.returnType = $1.returnType;
                 }
                 | N_FUNCTION_DEF
                 {
                     printRule("EXPR", "FUNCTION_DEF");
+                    $$.type = $1.type;
+                    $$.numParams = $1.numParams;
+                    $$.returnType = $1.returnType;
                 }
                 | N_FUNCTION_CALL
                 {
                     printRule("EXPR", "FUNCTION_CALL");
+                    $$.type = $1.type;
+                    $$.numParams = $1.numParams;
+                    $$.returnType = $1.returnType;
                 }
                 | N_QUIT_EXPR
                 {
                     printRule("EXPR", "QUIT_EXPR");
+                    $$.type = $1.type;
+                    $$.numParams = $1.numParams;
+                    $$.returnType = $1.returnType;
                     exit(1);
                 }
                 ;
@@ -138,90 +174,38 @@ N_EXPR          : N_IF_EXPR
 N_CONST         : T_INTCONST
                 {
                     printRule("CONST", "INTCONST");
+                    $$.type = INT;
+                    $$.numParams = NOT_APPLICABLE;
+                    $$.returnType = NOT_APPLICABLE;
                 }
                 | T_STRCONST
                 {
                     printRule("CONST", "STRCONST");
+                    $$.type = STR;
+                    $$.numParams = NOT_APPLICABLE;
+                    $$.returnType = NOT_APPLICABLE;
                 }
                 | T_FLOATCONST
                 {
                     printRule("CONST", "FLOATCONST");
+                    $$.type = FLOAT;
+                    $$.numParams = NOT_APPLICABLE;
+                    $$.returnType = NOT_APPLICABLE;
                 }
                 | T_TRUE
                 {
                     printRule("CONST", "TRUE");
+                    $$.type = BOOL;
+                    $$.numParams = NOT_APPLICABLE;
+                    $$.returnType = NOT_APPLICABLE;
+
                 }
                 | T_FALSE
                 {
                     printRule("CONST", "FALSE");
-                }
-                ;
-
-N_ARITHLOGIC_EXPR : N_SIMPLE_ARITHLOGIC
-                {
-                    printRule("ARITHLOGIC_EXPR", 
-                              "SIMPLE_ARITHLOGIC");
-                }
-                | N_SIMPLE_ARITHLOGIC N_REL_OP
-                  N_SIMPLE_ARITHLOGIC
-                {
-                    printRule("ARITHLOGIC_EXPR", 
-                              "SIMPLE_ARITHLOGIC REL_OP "
-                              "SIMPLE_ARITHLOGIC");
-                }
-                ;
-
-N_SIMPLE_ARITHLOGIC : N_TERM N_ADD_OP_LIST
-                {
-                    printRule("SIMPLE_ARITHLOGIC", 
-                              "TERM ADD_OP_LIST");
-                }
-                ;
-
-N_ADD_OP_LIST	: N_ADD_OP N_TERM N_ADD_OP_LIST
-                {
-                    printRule("ADD_OP_LIST", 
-                              "ADD_OP TERM ADD_OP_LIST");
-                }
-                | /* epsilon */
-                {
-                    printRule("ADD_OP_LIST", "epsilon");
-                }
-                ;
-
-N_TERM		: N_FACTOR N_MULT_OP_LIST
-                {
-                    printRule("TERM", 
-                              "FACTOR MULT_OP_LIST");
-                }
-                ;
-
-N_MULT_OP_LIST	: N_MULT_OP N_FACTOR N_MULT_OP_LIST
-                {
-                    printRule("MULT_OP_LIST", 
-                              "MULT_OP FACTOR MULT_OP_LIST");
-                }
-                | /* epsilon */
-                {
-                    printRule("MULT_OP_LIST", "epsilon");
-                }
-                ;
-
-N_FACTOR		: N_VAR
-                {
-                    printRule("FACTOR", "VAR");
-                }
-                | N_CONST
-                {
-                    printRule("FACTOR", "CONST");
-                }
-                | T_LPAREN N_EXPR T_RPAREN
-                {
-                    printRule("FACTOR", "( EXPR )");
-                }
-                | T_NOT N_FACTOR
-                {
-                    printRule("FACTOR", "! FACTOR");
+                    $$.type = BOOL;
+                    $$.numParams = NOT_APPLICABLE;
+                    $$.returnType = NOT_APPLICABLE;
                 }
                 ;
 
@@ -451,6 +435,74 @@ N_ARGS          : N_EXPR
                 | N_EXPR T_COMMA N_ARGS
                 {
                     printRule("ARGS", "EXPR, ARGS");
+                }
+                ;
+
+N_ARITHLOGIC_EXPR : N_SIMPLE_ARITHLOGIC
+                {
+                    printRule("ARITHLOGIC_EXPR",
+                              "SIMPLE_ARITHLOGIC");
+                }
+                | N_SIMPLE_ARITHLOGIC N_REL_OP
+                  N_SIMPLE_ARITHLOGIC
+                {
+                    printRule("ARITHLOGIC_EXPR",
+                              "SIMPLE_ARITHLOGIC REL_OP "
+                              "SIMPLE_ARITHLOGIC");
+                }
+                ;
+
+N_SIMPLE_ARITHLOGIC : N_TERM N_ADD_OP_LIST
+                {
+                    printRule("SIMPLE_ARITHLOGIC",
+                              "TERM ADD_OP_LIST");
+                }
+                ;
+
+N_ADD_OP_LIST	: N_ADD_OP N_TERM N_ADD_OP_LIST
+                {
+                    printRule("ADD_OP_LIST",
+                              "ADD_OP TERM ADD_OP_LIST");
+                }
+                | /* epsilon */
+                {
+                    printRule("ADD_OP_LIST", "epsilon");
+                }
+                ;
+
+N_TERM		: N_FACTOR N_MULT_OP_LIST
+                {
+                    printRule("TERM",
+                              "FACTOR MULT_OP_LIST");
+                }
+                ;
+
+N_MULT_OP_LIST	: N_MULT_OP N_FACTOR N_MULT_OP_LIST
+                {
+                    printRule("MULT_OP_LIST",
+                              "MULT_OP FACTOR MULT_OP_LIST");
+                }
+                | /* epsilon */
+                {
+                    printRule("MULT_OP_LIST", "epsilon");
+                }
+                ;
+
+N_FACTOR		: N_VAR
+                {
+                    printRule("FACTOR", "VAR");
+                }
+                | N_CONST
+                {
+                    printRule("FACTOR", "CONST");
+                }
+                | T_LPAREN N_EXPR T_RPAREN
+                {
+                    printRule("FACTOR", "( EXPR )");
+                }
+                | T_NOT N_FACTOR
+                {
+                    printRule("FACTOR", "! FACTOR");
                 }
                 ;
 
