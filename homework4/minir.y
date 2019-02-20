@@ -268,6 +268,13 @@ N_WHILE_EXPR    : T_WHILE T_LPAREN N_EXPR T_RPAREN N_LOOP_EXPR
                     printRule("WHILE_EXPR", 
                               "WHILE ( EXPR ) "
                               "LOOP_EXPR");
+                    if(($3.type == FUNCTION) || ($3.type == LIST) ||
+                       ($3.type == NULL_TYPE)) {
+                           yyerror("Arg 3 cannot be function or null or list");
+                       }
+                    $$.type = $5.type;
+                    $$.numParams = $5.numParams;
+                    $$.returnType = $$.returnType;
                 }
                 ;
 
@@ -277,32 +284,53 @@ N_FOR_EXPR      : T_FOR T_LPAREN T_IDENT T_IN N_EXPR T_RPAREN
                     printRule("FOR_EXPR", 
                               "FOR ( IDENT IN EXPR ) "
                               "LOOP_EXPR");
+                    if(($5.type == FUNCTION) || ($5.type == NULL_TYPE)) {
+                        yyerror("Arg 5 cannot be function or null");
+                    }
+                    $$.type = $7.type;
+                    $$.numParams = $7.numParams;
+                    $$.returnType = $7.returnType;
                 }
                 ;
 
 N_LOOP_EXPR     : N_EXPR
                 {
                     printRule("LOOP_EXPR", "EXPR");
+                    $$.type = $1.type;
+                    $$.numParams = $1.numParams;
+                    $$.returnType = $1.returnType;
                 }
                 | N_BREAK_EXPR
                 {
                     printRule("LOOP_EXPR", "BREAK_EXPR");
+                    $$.type = $1.type;
+                    $$.numParams = $1.numParams;
+                    $$.returnType = $1.returnType;
                 }
                 | N_NEXT_EXPR
                 {
                     printRule("LOOP_EXPR", "NEXT_EXPR");
+                    $$.type = $1.type;
+                    $$.numParams = $1.numParams;
+                    $$.returnType = $1.returnType;
                 }
                 ;
 
 N_BREAK_EXPR    : T_BREAK
                 {
                     printRule("BREAK_EXPR", "BREAK");
+                    $$.type = NULL_TYPE;
+                    $$.numParams = NOT_APPLICABLE;
+                    $$.returnType = NOT_APPLICABLE;
                 }
                 ;
 
 N_NEXT_EXPR     : T_NEXT
                 {
                     printRule("NEXT_EXPR", "NEXT");
+                    $$.type = NULL_TYPE;
+                    $$.numParams = NOT_APPLICABLE;
+                    $$.returnType = NOT_APPLICABLE;
                 }
                 ;
 
