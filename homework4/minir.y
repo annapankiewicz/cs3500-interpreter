@@ -396,17 +396,32 @@ N_OUTPUT_EXPR   : T_PRINT T_LPAREN N_EXPR T_RPAREN
                 {
                     printRule("OUTPUT_EXPR", 
                               "PRINT ( EXPR )");
+                    if(($3.type == FUNCTION) || ($3.type == NULL_TYPE)) {
+                        yyerror("Arg 3 cannot be function or null");
+                    }
+                    $$.type = $3.type;
+                    $$.numParams = $3.numParams;
+                    $$.returnType = $3.returnType;
                 }
                 | T_CAT T_LPAREN N_EXPR T_RPAREN
                 {
                     printRule("OUTPUT_EXPR", 
                               "CAT ( EXPR )");
+                    if(($3.type == FUNCTION) || ($3.type == NULL_TYPE)) {
+                        yyerror("Arg 3 cannot be function or null");
+                    }
+                    $$.type = NULL_TYPE;
+                    $$.numParams = $3.numParams;
+                    $$.returnType = $3.returnType;
                 }
                 ;
 
 N_INPUT_EXPR    : T_READ T_LPAREN N_VAR T_RPAREN
                 {
                     printRule("INPUT_EXPR", "READ ( VAR )");
+                    $$.type = INT_OR_STR_OR_FLOAT;
+                    $$.numParams = NOT_APPLICABLE;
+                    $$.returnType = NOT_APPLICABLE;
                 }
                 ;
 
