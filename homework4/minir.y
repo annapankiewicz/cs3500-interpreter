@@ -441,17 +441,27 @@ N_FUNCTION_DEF  : T_FUNCTION T_LPAREN
                     printRule("FUNCTION_DEF",
                               "FUNCTION ( PARAM_LIST )"
                               " COMPOUND_EXPR");
+
                     endScope();
+                    if($6.type == FUNCTION) {
+                        yyerror("Arg 6 cannot be function");
+                    }
+                    $$.type = FUNCTION;
+                    $$.numParams = $4;
+                    $$.returnType = $6.returnType;
                 }
                 ;
 
 N_PARAM_LIST    : N_PARAMS
                 {
                     printRule("PARAM_LIST", "PARAMS");
+                    $$ = $1;
                 }
                 | N_NO_PARAMS
                 {
                     printRule("PARAM_LIST", "NO PARAMS");
+                    numParams = 0;
+                    $$ = numParams;
                 }
                 ;
 
@@ -467,12 +477,15 @@ N_PARAMS        : T_IDENT
                     string lexeme = string($1);
                     printf("___Adding %s to symbol table\n", $1);
                     // assuming params are ints according to assignment description
+                    TYPE_INFO exprTypeInfo = {INT, NOT_APPLICABLE, NOT_APPLICABLE};
                     bool success = scopeStack.top().addEntry(SYMBOL_TABLE_ENTRY
-                        (lexeme,{INT, NOT_APPLICABLE, NOT_APPLICABLE}));
+                        (lexeme, exprTypeInfo));
                     if(!success) {
                         yyerror("Multiply defined identifier");
-                        return(0);
+                        return(1);
                     }
+                    numParams++;
+                    $$ = numParams;
                 }
                 | T_IDENT T_COMMA N_PARAMS
                 {
@@ -480,12 +493,15 @@ N_PARAMS        : T_IDENT
                     string lexeme = string($1);
                     printf("___Adding %s to symbol table\n", $1);
                     // assuming params are ints according to assignment description
+                    TYPE_INFO exprTypeInfo = {INT, NOT_APPLICABLE, NOT_APPLICABLE};
                     bool success = scopeStack.top().addEntry(SYMBOL_TABLE_ENTRY
-                        (lexeme, {INT, NOT_APPLICABLE, NOT_APPLICABLE}));
+                        (lexeme, exprTypeInfo));
                     if(!success) {
                         yyerror("Multiply defined identifier");
-                        return(0);
+                        return(1);
                     }
+                    numParams++;
+                    $$ = numParams;
                 }
                 ;
 
