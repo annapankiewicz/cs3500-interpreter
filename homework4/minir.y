@@ -73,7 +73,7 @@ extern "C"
 %type <typeInfo> N_FUNCTION_CALL N_QUIT_EXPR N_CONST N_EXPR_LIST
 %type <typeInfo> N_LOOP_EXPR N_BREAK_EXPR N_NEXT_EXPR
 
-%type <num> N_PARAM_LIST N_PARAMS
+%type <num> N_PARAM_LIST N_PARAMS N_ARG_LIST N_ARGS
 
 /*
  *  To eliminate ambiguity in if/else
@@ -456,6 +456,7 @@ N_PARAM_LIST    : N_PARAMS
                 {
                     printRule("PARAM_LIST", "PARAMS");
                     $$ = $1;
+                    numParams = 0;
                 }
                 | N_NO_PARAMS
                 {
@@ -509,16 +510,35 @@ N_FUNCTION_CALL : T_IDENT T_LPAREN N_ARG_LIST T_RPAREN
                 {
                     printRule("FUNCTION_CALL", "IDENT"
                               " ( ARG_LIST )");
+                    string ident = string($1);
+                    TYPE_INFO exprTypeInfo = findEntryInAnyScope(ident);
+                    // probably need this? checking with Dr. Leopold
+                    if(exprTypeInfo.type == UNDEFINED) {
+                        yyerror("Undefined identifier");
+                    }
+                    if(exprTypeInfo.type != FUNCTION) {
+                        yyerror("Arg 1 must be function");
+                    }
+                    if($3 > exprTypeInfo.numParams) {
+                        yyerror("Too many parameters in function call");
+                    }
+                    if($3 < exprTypeInfo.numParams) {
+                        yyerror("Too few parameters in function call");
+                    }
                 }
                 ;
 
 N_ARG_LIST      : N_ARGS
                 {
                     printRule("ARG_LIST", "ARGS");
+                    $$ = $1;
+                    numExprs = 0;
                 }
                 | N_NO_ARGS
                 {
                     printRule("ARG_LIST", "NO_ARGS");
+                    numExprs = 0;
+                    $$ = numExprs;
                 }
                 ;
 
@@ -531,10 +551,22 @@ N_NO_ARGS       : /* epsilon */
 N_ARGS          : N_EXPR
                 {
                     printRule("ARGS", "EXPR");
+                    numExprs++;
+                    if($1.type != INT) {
+                        string errorMsg = "Arg " + to_string(numExprs) + " must be integer";
+                        yyerror(errorMsg.c_str());
+                    }
+                    $$ = numExprs;
                 }
                 | N_EXPR T_COMMA N_ARGS
                 {
                     printRule("ARGS", "EXPR, ARGS");
+                    numExprs++;
+                    if($1.type != INT) {
+                        string errorMsg = "Arg " + to_string(numExprs) + " must be integer";
+                        yyerror(errorMsg.c_str());
+                    }
+                    $$ = numExprs;
                 }
                 ;
 
