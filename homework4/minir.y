@@ -50,6 +50,7 @@ extern "C"
 
 %union {
     char* text;
+    int num;
     TYPE_INFO typeInfo;
 };
 
@@ -66,7 +67,13 @@ extern "C"
 
 %type <text> T_IDENT
 
-%type <typeInfo> N_CONST N_EXPR N_COMPOUND_EXPR N_EXPR_LIST N_IF_EXPR
+%type <typeInfo> N_EXPR N_IF_EXPR N_WHILE_EXPR N_FOR_EXPR
+%type <typeInfo> N_COMPOUND_EXPR N_ARITHLOGIC_EXPR N_ASSIGNMENT_EXPR
+%type <typeInfo> N_OUTPUT_EXPR N_INPUT_EXPR N_LIST_EXPR N_FUNCTION_DEF
+%type <typeInfo> N_FUNCTION_CALL N_QUIT_EXPR N_CONST N_EXPR_LIST
+%type <typeInfo> N_LOOP_EXPR N_BREAK_EXPR N_NEXT_EXPR
+
+%type <num> N_PARAM_LIST N_PARAMS
 
 /*
  *  To eliminate ambiguity in if/else
