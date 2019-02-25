@@ -266,7 +266,7 @@ N_FOR_EXPR      : T_FOR T_LPAREN T_IDENT
                               "FOR ( IDENT IN EXPR ) "
                               "LOOP_EXPR");
                     string lexeme = string($3);
-                    if(!findEntryInAnyScope($3))
+                    if(!(scopeStack.top().findEntry(lexeme)))
                         printf("___Adding %s to symbol table\n", $3);
                         bool success = scopeStack.top().addEntry(
                             SYMBOL_TABLE_ENTRY(lexeme, UNDEFINED));
