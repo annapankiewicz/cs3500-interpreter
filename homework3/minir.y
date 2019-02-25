@@ -266,6 +266,10 @@ N_FOR_EXPR      : T_FOR T_LPAREN T_IDENT T_IN N_EXPR T_RPAREN
                     printRule("FOR_EXPR", 
                               "FOR ( IDENT IN EXPR ) "
                               "LOOP_EXPR");
+                    string lexeme = string($3);
+                    printf("___Adding %s to symbol table\n", $3);
+                    bool success = scopeStack.top().addEntry(
+                        SYMBOL_TABLE_ENTRY(lexeme, UNDEFINED));
                 }
                 ;
 
@@ -321,10 +325,6 @@ N_ASSIGNMENT_EXPR : T_IDENT N_INDEX T_ASSIGN N_EXPR
                     printf("___Adding %s to symbol table\n", $1);
                     bool success = scopeStack.top().addEntry(
                         SYMBOL_TABLE_ENTRY(lexeme, UNDEFINED));
-                    if(!success) {
-                      yyerror("Multiply defined identifier");
-                      return(0);
-                    }
                 }
                 ;
 
@@ -362,11 +362,11 @@ N_INPUT_EXPR    : T_READ T_LPAREN N_VAR T_RPAREN
                 }
                 ;
 
-N_FUNCTION_DEF  : T_FUNCTION T_LPAREN
+N_FUNCTION_DEF  : T_FUNCTION
                 {
                     beginScope();
                 }
-                N_PARAM_LIST T_RPAREN N_COMPOUND_EXPR
+                T_LPAREN N_PARAM_LIST T_RPAREN N_COMPOUND_EXPR
                 {
                     printRule("FUNCTION_DEF",
                               "FUNCTION ( PARAM_LIST )"
@@ -421,6 +421,10 @@ N_FUNCTION_CALL : T_IDENT T_LPAREN N_ARG_LIST T_RPAREN
                 {
                     printRule("FUNCTION_CALL", "IDENT"
                               " ( ARG_LIST )");
+                    if (!findEntryInAnyScope($1)) {
+                        yyerror("Undefined identifier");
+                        return(0);
+                    }
                 }
                 ;
 
