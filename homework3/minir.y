@@ -260,17 +260,18 @@ N_WHILE_EXPR    : T_WHILE T_LPAREN N_EXPR T_RPAREN N_LOOP_EXPR
                 }
                 ;
 
-N_FOR_EXPR      : T_FOR T_LPAREN T_IDENT T_IN N_EXPR T_RPAREN
-                  N_LOOP_EXPR
+N_FOR_EXPR      : T_FOR T_LPAREN T_IDENT
                 {
                     printRule("FOR_EXPR", 
                               "FOR ( IDENT IN EXPR ) "
                               "LOOP_EXPR");
                     string lexeme = string($3);
-                    printf("___Adding %s to symbol table\n", $3);
-                    bool success = scopeStack.top().addEntry(
-                        SYMBOL_TABLE_ENTRY(lexeme, UNDEFINED));
+                    if(!findEntryInAnyScope($3))
+                        printf("___Adding %s to symbol table\n", $3);
+                        bool success = scopeStack.top().addEntry(
+                            SYMBOL_TABLE_ENTRY(lexeme, UNDEFINED));
                 }
+                T_IN N_EXPR T_RPAREN N_LOOP_EXPR
                 ;
 
 N_LOOP_EXPR     : N_EXPR
