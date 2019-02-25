@@ -1,0 +1,7 @@
+pizza = function(three, two, one) {
+    three = "pepperoni";
+    pineapple = function(topping, sauce) {
+	print(topping);
+	sauce = one %% two
+    }
+}
