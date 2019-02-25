@@ -4,7 +4,10 @@ teal = function(start, middle, end)
     middle = end;
     end = 7;
     if (17-start > 0) {
-        print(middle + end)
+	for(end in list(1, 2, 3))
+	{
+	    print(middle)
+	}
     } else {
 	print(start)
     }

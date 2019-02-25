@@ -9,10 +9,10 @@ TOKEN: IDENT 		 LEXEME: found
 TOKEN: ASSIGN 		 LEXEME: =
 INDEX ->  epsilon
 TOKEN: FUNCTION 		 LEXEME: function
-TOKEN: LPAREN 		 LEXEME: (
 
 ___Entering new scope...
 
+TOKEN: LPAREN 		 LEXEME: (
 TOKEN: IDENT 		 LEXEME: final
 TOKEN: RPAREN 		 LEXEME: )
 PARAMS -> IDENT

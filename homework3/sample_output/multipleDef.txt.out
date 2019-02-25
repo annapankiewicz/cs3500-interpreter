@@ -5,10 +5,10 @@ TOKEN: IDENT 		 LEXEME: banana
 TOKEN: ASSIGN 		 LEXEME: =
 INDEX ->  epsilon
 TOKEN: FUNCTION 		 LEXEME: function
-TOKEN: LPAREN 		 LEXEME: (
 
 ___Entering new scope...
 
+TOKEN: LPAREN 		 LEXEME: (
 TOKEN: IDENT 		 LEXEME: x
 TOKEN: COMMA 		 LEXEME: ,
 TOKEN: IDENT 		 LEXEME: y
