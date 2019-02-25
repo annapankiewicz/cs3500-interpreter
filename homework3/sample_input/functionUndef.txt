@@ -1,0 +1,6 @@
+{
+    banana = function(x) {
+	x = 3
+    };
+    apple(3, 4)
+}
