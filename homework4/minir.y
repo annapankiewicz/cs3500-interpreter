@@ -239,7 +239,6 @@ N_EXPR_LIST     : T_SEMICOLON N_EXPR N_EXPR_LIST
                 | /* epsilon */
                 {
                     printRule("EXPR_LIST", "epsilon");
-                    // worry about this type later
                 }
                 ;
 
@@ -267,6 +266,9 @@ N_IF_EXPR       : T_IF T_LPAREN N_EXPR T_RPAREN N_EXPR
                     if($5.type == FUNCTION) {
                         yyerror("Arg 2 cannot be function");
                     }
+                    $$.type = $5.type ^ $7.type;
+                    $$.numParams = NOT_APPLICABLE;
+                    $$.returnType = NOT_APPLICABLE;
                 }
                 ;
 
@@ -285,18 +287,26 @@ N_WHILE_EXPR    : T_WHILE T_LPAREN N_EXPR T_RPAREN N_LOOP_EXPR
                 }
                 ;
 
-N_FOR_EXPR      : T_FOR T_LPAREN T_IDENT T_IN N_EXPR T_RPAREN
-                  N_LOOP_EXPR
+N_FOR_EXPR      : T_FOR T_LPAREN T_IDENT
                 {
                     printRule("FOR_EXPR", 
                               "FOR ( IDENT IN EXPR ) "
                               "LOOP_EXPR");
-                    if(($5.type == FUNCTION) || ($5.type == NULL_TYPE)) {
+                    string lexeme = string($3);
+                    if(!(scopeStack.top().findEntry(lexeme))) {
+                        printf("___Adding %s to symbol table\n", $3);
+                        bool success = scopeStack.top().addEntry(
+                            SYMBOL_TABLE_ENTRY(lexeme, UNDEFINED));
+                    }
+                }
+                T_IN N_EXPR T_RPAREN N_LOOP_EXPR
+                {
+                    if(($8.type == FUNCTION) || ($8.type == NULL_TYPE)) {
                         yyerror("Arg 5 cannot be function or null");
                     }
-                    $$.type = $7.type;
-                    $$.numParams = $7.numParams;
-                    $$.returnType = $7.returnType;
+                    $$.type = $8.type;
+                    $$.numParams = $8.numParams;
+                    $$.returnType = $8.returnType;
                 }
                 ;
 
@@ -362,21 +372,23 @@ N_CONST_LIST    : N_CONST T_COMMA N_CONST_LIST
                 }
                 ;
 
-N_ASSIGNMENT_EXPR : T_IDENT N_INDEX T_ASSIGN N_EXPR
+N_ASSIGNMENT_EXPR : T_IDENT N_INDEX
                 {
                     printRule("ASSIGNMENT_EXPR", 
                               "IDENT INDEX ASSIGN EXPR");
                     string lexeme = string($1);
-                    printf("___Adding %s to symbol table\n", $1);
-                    bool success = scopeStack.top().addEntry(SYMBOL_TABLE_ENTRY
-                        (lexeme, {$4.type, NOT_APPLICABLE, NOT_APPLICABLE}));
-                    if(!success) {
-                      yyerror("Multiply defined identifier");
-                      return(0);
+                    if(!(scopeStack.top().findEntry(lexeme))) {
+                        printf("___Adding %s to symbol table\n", $1);
+                        bool success = scopeStack.top().addEntry(
+                            SYMBOL_TABLE_ENTRY(lexeme,
+                                {$5.type, NOT_APPLICABLE, NOT_APPLICABLE}));
                     }
-                    $$.type = $4.type;
-                    $$.numParams = $4.numParams;
-                    $$.returnType = $4.returnType;
+                }
+                T_ASSIGN N_EXPR
+                {
+                    $$.type = $5.type;
+                    $$.numParams = $5.numParams;
+                    $$.returnType = $5.returnType;
                 }
                 ;
 
@@ -432,11 +444,11 @@ N_INPUT_EXPR    : T_READ T_LPAREN N_VAR T_RPAREN
                 }
                 ;
 
-N_FUNCTION_DEF  : T_FUNCTION T_LPAREN
+N_FUNCTION_DEF  : T_FUNCTION
                 {
                     beginScope();
                 }
-                N_PARAM_LIST T_RPAREN N_COMPOUND_EXPR
+                T_LPAREN N_PARAM_LIST T_RPAREN N_COMPOUND_EXPR
                 {
                     printRule("FUNCTION_DEF",
                               "FUNCTION ( PARAM_LIST )"
@@ -510,12 +522,11 @@ N_FUNCTION_CALL : T_IDENT T_LPAREN N_ARG_LIST T_RPAREN
                 {
                     printRule("FUNCTION_CALL", "IDENT"
                               " ( ARG_LIST )");
-                    string ident = string($1);
-                    TYPE_INFO exprTypeInfo = findEntryInAnyScope(ident);
-                    // probably need this? checking with Dr. Leopold
-                    if(exprTypeInfo.type == UNDEFINED) {
+                    if (!findEntryInAnyScope($1)) {
                         yyerror("Undefined identifier");
+                        return(0);
                     }
+                    TYPE_INFO exprTypeInfo = findEntryInAnyScope($1);
                     if(exprTypeInfo.type != FUNCTION) {
                         yyerror("Arg 1 must be function");
                     }
@@ -715,9 +726,7 @@ N_SINGLE_ELEMENT : T_IDENT T_LBRACKET T_LBRACKET N_EXPR
                 {
                     printRule("SINGLE_ELEMENT", "IDENT"
                               " [[ EXPR ]]");
-                    string ident = string($1);
-                    TYPE_INFO exprTypeInfo = findEntryInAnyScope(ident);
-                    if(exprTypeInfo.type == UNDEFINED) {
+                    if (!findEntryInAnyScope($1)) {
                         yyerror("Undefined identifier");
                         return(0);
                     }
@@ -727,9 +736,8 @@ N_SINGLE_ELEMENT : T_IDENT T_LBRACKET T_LBRACKET N_EXPR
 N_ENTIRE_VAR    : T_IDENT
                 {
                     printRule("ENTIRE_VAR", "IDENT");
-                    string ident = string($1);
-                    TYPE_INFO exprTypeInfo = findEntryInAnyScope(ident);
-                    if(exprTypeInfo.type == UNDEFINED) {
+                    if(!findEntryInAnyScope($1))
+                    {
                         yyerror("Undefined identifier");
                         return(0);
                     }
