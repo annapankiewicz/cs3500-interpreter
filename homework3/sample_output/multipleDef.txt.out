@@ -4,6 +4,8 @@ ___Entering new scope...
 TOKEN: IDENT 		 LEXEME: banana
 TOKEN: ASSIGN 		 LEXEME: =
 INDEX ->  epsilon
+ASSIGNMENT_EXPR -> IDENT INDEX ASSIGN EXPR
+___Adding banana to symbol table
 TOKEN: FUNCTION 		 LEXEME: function
 
 ___Entering new scope...

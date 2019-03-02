@@ -4,6 +4,8 @@ ___Entering new scope...
 TOKEN: IDENT 		 LEXEME: mrPeanutButter
 TOKEN: ASSIGN 		 LEXEME: =
 INDEX ->  epsilon
+ASSIGNMENT_EXPR -> IDENT INDEX ASSIGN EXPR
+___Adding mrPeanutButter to symbol table
 TOKEN: IDENT 		 LEXEME: bojack
 ENTIRE_VAR -> IDENT
 Line 2: Undefined identifier

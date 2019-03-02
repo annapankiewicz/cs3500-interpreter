@@ -2,12 +2,11 @@
 ___Entering new scope...
 
 TOKEN: LBRACE 		 LEXEME: {
-
-___Entering new scope...
-
 TOKEN: IDENT 		 LEXEME: banana
 TOKEN: ASSIGN 		 LEXEME: =
 INDEX ->  epsilon
+ASSIGNMENT_EXPR -> IDENT INDEX ASSIGN EXPR
+___Adding banana to symbol table
 TOKEN: FUNCTION 		 LEXEME: function
 
 ___Entering new scope...
@@ -19,12 +18,10 @@ PARAMS -> IDENT
 ___Adding x to symbol table
 PARAM_LIST -> PARAMS
 TOKEN: LBRACE 		 LEXEME: {
-
-___Entering new scope...
-
 TOKEN: IDENT 		 LEXEME: x
 TOKEN: ASSIGN 		 LEXEME: =
 INDEX ->  epsilon
+ASSIGNMENT_EXPR -> IDENT INDEX ASSIGN EXPR
 TOKEN: INTCONST 		 LEXEME: 3
 CONST -> INTCONST
 FACTOR -> CONST
@@ -35,8 +32,6 @@ ADD_OP_LIST -> epsilon
 SIMPLE_ARITHLOGIC -> TERM ADD_OP_LIST
 ARITHLOGIC_EXPR -> SIMPLE_ARITHLOGIC
 EXPR -> ARITHLOGIC_EXPR
-ASSIGNMENT_EXPR -> IDENT INDEX ASSIGN EXPR
-___Adding x to symbol table
 EXPR -> ASSIGNMENT_EXPR
 EXPR_LIST -> epsilon
 COMPOUND_EXPR -> { EXPR EXPR_LIST }
@@ -45,8 +40,6 @@ FUNCTION_DEF -> FUNCTION ( PARAM_LIST ) COMPOUND_EXPR
 ___Exiting scope...
 
 EXPR -> FUNCTION_DEF
-ASSIGNMENT_EXPR -> IDENT INDEX ASSIGN EXPR
-___Adding banana to symbol table
 EXPR -> ASSIGNMENT_EXPR
 TOKEN: SEMICOLON 		 LEXEME: ;
 TOKEN: IDENT 		 LEXEME: apple
