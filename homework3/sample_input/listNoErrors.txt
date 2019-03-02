@@ -1,0 +1,5 @@
+{
+    banana = list(5, 6, 7, 8);
+    sixth_banana = banana[[1]];
+    print(sixth_banana)
+}
