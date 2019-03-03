@@ -47,10 +47,11 @@ using namespace std;
 #define LIST_OR_BOOL_OR_FLOAT     56
 
 // every unique combinations of four type codes
-#define INT_OR_BOOL_OR_STR_OR_FLOAT     30
+#define INT_OR_STR_OR_FLOAT_OR_BOOL     30
 #define LIST_OR_FLOAT_OR_BOOL_OR_STR    60
 #define LIST_OR_BOOL_OR_STR_OR_INT      46
 #define LIST_OR_FLOAT_OR_STR_OR_INT     54
+#define INT_OR_BOOL_OR_FLOAT_OR_LIST    58
 
 // only one combination of five type codes
 #define INT_OR_BOOL_OR_STR_OR_FLOAT_OR_LIST     62
@@ -90,6 +91,7 @@ public:
   // Accessors
   string getName() const { return name; }
   TYPE_INFO getTypeInfo() const { return typeInfo; }
+
 };
 
 #endif  // SYMBOL_TABLE_ENTRY_H

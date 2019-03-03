@@ -23,6 +23,12 @@ int numExprs = 0;
 
 stack<SYMBOL_TABLE> scopeStack; // stack of scope hashtables
 
+bool isIntCompatible(const int theType);
+bool isStrCompatible(const int theType);
+bool isBoolCompatible(const int theType);
+bool isFloatCompatible(const int theType);
+bool isListCompatible(const int theType);
+
 void beginScope();
 void endScope();
 void cleanUp();
@@ -758,6 +764,84 @@ void printRule(const char *lhs, const char *rhs)
 {
     printf("%s -> %s\n", lhs, rhs);
     return;
+}
+
+bool isIntCompatible(const int theType)
+{
+    return((theType == INT) || (theType == INT_OR_STR) ||
+        (theType == INT_OR_BOOL) || (theType == INT_OR_FLOAT) ||
+        (theType == LIST_OR_INT) || (theType == INT_OR_STR_OR_BOOL) ||
+        (theType == INT_OR_STR_OR_FLOAT) ||
+        (theType == INT_OR_BOOL_OR_FLOAT) ||
+        (theType == LIST_OR_INT_OR_FLOAT) ||
+        (theType == LIST_OR_INT_OR_STR) || (theType == LIST_OR_INT_OR_BOOL) ||
+        (theType == INT_OR_STR_OR_FLOAT_OR_BOOL) ||
+        (theType == LIST_OR_BOOL_OR_STR_OR_INT) ||
+        (theType == LIST_OR_FLOAT_OR_STR_OR_INT) ||
+        (theType == INT_OR_BOOL_OR_FLOAT_OR_LIST) ||
+        (theType == INT_OR_BOOL_OR_STR_OR_FLOAT_OR_LIST));
+}
+
+bool isStrCompatible(const int theType)
+{
+    return((theType == STR) || (theType == INT_OR_STR) ||
+        (theType == STR_OR_BOOL) || (theType == STR_OR_FLOAT) ||
+        (theType == LIST_OR_STR) || (theType == INT_OR_STR_OR_BOOL) ||
+        (theType == INT_OR_STR_OR_FLOAT) ||
+        (theType == STR_OR_BOOL_OR_FLOAT) ||
+        (theType == LIST_OR_INT_OR_STR) ||
+        (theType == LIST_OR_STR_OR_BOOL) ||
+        (theType == LIST_OR_STR_OR_FLOAT) ||
+        (theType == INT_OR_STR_OR_FLOAT_OR_BOOL) ||
+        (theType == LIST_OR_FLOAT_OR_BOOL_OR_STR) ||
+        (theType == LIST_OR_BOOL_OR_STR_OR_INT) ||
+        (theType == LIST_OR_FLOAT_OR_STR_OR_INT) ||
+        (theType == INT_OR_BOOL_OR_STR_OR_FLOAT_OR_LIST));
+}
+
+bool isBoolCompatible(const int theType)
+{
+    return((theType == BOOL) || (theType == INT_OR_BOOL) ||
+           (theType == STR_OR_BOOL) || (theType == BOOL_OR_FLOAT) ||
+           (theType == LIST_OR_BOOL) || (theType == INT_OR_STR_OR_BOOL) ||
+           (theType == INT_OR_BOOL_OR_FLOAT) || (theType == STR_OR_BOOL_OR_FLOAT) ||
+           (theType == LIST_OR_INT_OR_BOOL) || (theType == LIST_OR_STR_OR_BOOL) ||
+           (theType == LIST_OR_BOOL_OR_FLOAT) ||
+           (theType == INT_OR_STR_OR_FLOAT_OR_BOOL) ||
+           (theType == LIST_OR_FLOAT_OR_BOOL_OR_STR) ||
+           (theType == LIST_OR_BOOL_OR_STR_OR_INT) ||
+           (theType == INT_OR_BOOL_OR_FLOAT_OR_LIST) ||
+           (theType == INT_OR_BOOL_OR_STR_OR_FLOAT_OR_LIST)
+}
+
+bool isFloatCompatible(const int theType)
+{
+    return((theType == FLOAT) || (theType == INT_OR_FLOAT) ||
+           (theType == STR_OR_FLOAT) || (theType == BOOL_OR_FLOAT) ||
+           (theType == LIST_OR_FLOAT) || (theType == INT_OR_STR_OR_FLOAT) ||
+           (theType == INT_OR_BOOL_OR_FLOAT) || (theType == STR_OR_BOOL_OR_FLOAT) ||
+           (theType == LIST_OR_INT_OR_FLOAT) || (theType == LIST_OR_STR_OR_FLOAT) ||
+           (theType == LIST_OR_BOOL_OR_FLOAT) ||
+           (theType == INT_OR_STR_OR_FLOAT_OR_BOOL) ||
+           (theType == LIST_OR_FLOAT_OR_BOOL_OR_STR) ||
+           (theType == LIST_OR_FLOAT_OR_STR_OR_INT) ||
+           (theType == INT_OR_BOOL_OR_FLOAT_OR_LIST) ||
+           (theType == INT_OR_BOOL_OR_STR_OR_FLOAT_OR_LIST)
+}
+
+bool isListCompatible(const int theType)
+{
+    return((theType == LIST) || (theType == LIST_OR_INT) ||
+           (theType == LIST_OR_STR) || (theType == LIST_OR_BOOL) ||
+           (theType == LIST_OR_FLOAT) || (theType == LIST_OR_INT_OR_STR) ||
+           (theType == LIST_OR_INT_OR_BOOL) || (theType == LIST_OR_INT_OR_FLOAT) ||
+           (theType == LIST_OR_STR_OR_BOOL) || (theType == LIST_OR_STR_OR_FLOAT) ||
+           (theType == LIST_OR_BOOL_OR_FLOAT) ||
+           (theType == LIST_OR_FLOAT_OR_BOOL_OR_STR) ||
+           (theType == LIST_OR_BOOL_OR_STR_OR_INT) ||
+           (theType == LIST_OR_FLOAT_OR_STR_OR_INT) ||
+           (theType == INT_OR_BOOL_OR_FLOAT_OR_LIST) ||
+           (theType == INT_OR_BOOL_OR_STR_OR_FLOAT_OR_LIST));
 }
 
 void beginScope() {
