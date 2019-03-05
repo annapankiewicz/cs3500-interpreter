@@ -17,9 +17,14 @@
 #include "SymbolTable.h"
 using namespace std;
 
+#define ARITHMETIC_OP   1
+#define LOGICAL_OP      2
+#define RELATIONAL_OP   3
+
 int line_num = 1;
 int numParams = 0;
 int numExprs = 0;
+bool identExists = false;
 
 stack<SYMBOL_TABLE> scopeStack; // stack of scope hashtables
 
@@ -28,6 +33,8 @@ bool isStrCompatible(const int theType);
 bool isBoolCompatible(const int theType);
 bool isFloatCompatible(const int theType);
 bool isListCompatible(const int theType);
+
+bool isIntOrFloatOrBoolCompatible(const int theType);
 
 void beginScope();
 void endScope();
@@ -78,8 +85,10 @@ extern "C"
 %type <typeInfo> N_OUTPUT_EXPR N_INPUT_EXPR N_LIST_EXPR N_FUNCTION_DEF
 %type <typeInfo> N_FUNCTION_CALL N_QUIT_EXPR N_CONST N_EXPR_LIST
 %type <typeInfo> N_LOOP_EXPR N_BREAK_EXPR N_NEXT_EXPR
+%type <typeInfo> N_SIMPLE_ARITHLOGIC N_TERM N_ADD_OP_LIST N_ADD_OP
+%type <typeInfo> N_FACTOR N_MULT_OP_LIST N_VAR N_CONST
 
-%type <num> N_PARAM_LIST N_PARAMS N_ARG_LIST N_ARGS
+%type <num> N_PARAM_LIST N_PARAMS N_ARG_LIST N_ARGS N_REL_OP N_ADD_OP N_MULT_OP
 
 /*
  *  To eliminate ambiguity in if/else
@@ -383,18 +392,64 @@ N_ASSIGNMENT_EXPR : T_IDENT N_INDEX
                     printRule("ASSIGNMENT_EXPR", 
                               "IDENT INDEX ASSIGN EXPR");
                     string lexeme = string($1);
-                    if(!(scopeStack.top().findEntry(lexeme))) {
+                    TYPE_INFO exprTypeInfo = scopeStack.top().findEntry(lexeme);
+                    if(exprTypeInfo.type == UNDEFINED) {
                         printf("___Adding %s to symbol table\n", $1);
+                        // add in as not applicable type until the N_EXPR can be
+                        // accessed below to get the correct type
                         bool success = scopeStack.top().addEntry(
                             SYMBOL_TABLE_ENTRY(lexeme,
-                                {$5.type, NOT_APPLICABLE, NOT_APPLICABLE}));
+                            {NOT_APPLICABLE, NOT_APPLICABLE, NOT_APPLICABLE}));
+                        if(success) {
+                            identExists = true;
+                        }
+                    }
+                    else {
+                        identExists = true;
                     }
                 }
                 T_ASSIGN N_EXPR
                 {
+                    // TODO(anna): this is incredibly ugly
+                    // first check for compatibility if the IDENT already existed
+                    string lexeme = string($1);
+                    if(identExists) {
+                        TYPE_INFO exprTypeInfo = scopeStack.top().findEntry(lexeme);
+                        // check for compatibility with N_EXPR
+                        if(!isIntCompatible($5.type) && (isIntCompatible(exprTypeInfo.type)))
+                            yyerror("Arg 4 must be an integer");
+                        else if((!isStrCompatible($5.type)) && (isStrCompatible(exprTypeInfo.type)))
+                            yyerror("Arg 4 must be a string");
+                        else if((!isBoolCompatible($5.type)) && (isBoolCompatible(exprTypeInfo.type)))
+                            yyerror("Arg 4 must be a bool");
+                        else if((!isFloatCompatible($5.type)) && (isFloatCompatible(exprTypeInfo.type)))
+                            yyerror("Arg 4 must be a float");
+                        else if((!isListCompatible($5.type)) && (isListCompatible(exprTypeInfo.type)))
+                            yyerror("Arg 4 must be a list");
+                        else if(($5.type != FUNCTION) && (exprTypeInfo.type == FUNCTION))
+                            yyerror("Arg 4 must be a function");
+                        else if(($5.type != NULL_TYPE) && (exprTypeInfo.type == NULL_TYPE))
+                            yyerror("Arg 4 must be null");
+                        else {
+                            // assign the n_expr type to the ident
+                            bool success = scopeStack.top().changeEntry(
+                                SYMBOL_TABLE_ENTRY(lexeme,
+                                {$5.type, NOT_APPLICABLE, NOT_APPLICABLE}));
+                        }
+                    }
+                    else {
+                        // if it doesn't exist, just change the type
+                        bool success = scopeStack.top().changeEntry(
+                            SYMBOL_TABLE_ENTRY(lexeme,
+                            {$5.type, NOT_APPLICABLE, NOT_APPLICABLE}));
+                    }
+
+                    identExists;
                     $$.type = $5.type;
                     $$.numParams = $5.numParams;
                     $$.returnType = $5.returnType;
+
+                    // TODO(anna): handle N_INDEX that doesn't go to epsilon
                 }
                 ;
 
@@ -842,6 +897,12 @@ bool isListCompatible(const int theType)
            (theType == LIST_OR_FLOAT_OR_STR_OR_INT) ||
            (theType == INT_OR_BOOL_OR_FLOAT_OR_LIST) ||
            (theType == INT_OR_BOOL_OR_STR_OR_FLOAT_OR_LIST));
+}
+
+bool isIntOrFloatOrBoolCompatible(const int theType)
+{
+    return((isIntCompatible(theType)) || (isFloatCompatible(theType)) ||
+           (isBoolCompatible(theType)));
 }
 
 void beginScope() {
