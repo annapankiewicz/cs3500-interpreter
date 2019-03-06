@@ -721,7 +721,21 @@ N_ADD_OP_LIST	: N_ADD_OP N_TERM N_ADD_OP_LIST
                     if(!(isIntOrFloatOrBoolCompatible($2.type))) {
                         yyerror("Arg 2 must be integer or float or bool");
                     }
-                    $$.type = $2.type || $3.type;
+                    switch($1) {
+                        case ARITHMETIC_OP:
+                            if(($2.type == INT) && ($3.type == INT)){
+                                $$.type = INT;
+                            }
+                            else if(($2.type == FLOAT) || ($3.type == FLOAT)) {
+                                $$.type = FLOAT;
+                            }
+                            break;
+                        case LOGICAL_OP:
+                            $$.type = BOOL;
+                            break;
+                        default:
+                            break;
+                    }
                     $$.numParams = $2.numParams;
                     $$.returnType = $2.returnType;
                 }
@@ -751,7 +765,20 @@ N_MULT_OP_LIST	: N_MULT_OP N_FACTOR N_MULT_OP_LIST
                     if(!(isIntOrFloatOrBoolCompatible($2.type))) {
                         yyerror("Arg 2 must be integer or float or bool");
                     }
-                    $$.type = $2.type || $3.type;
+                    switch($1) {
+                        case ARITHMETIC_OP:
+                            if(($2.type == INT) && ($3.type == INT)){
+                                $$.type = INT;
+                            }
+                            else if(($2.type == FLOAT) || ($3.type == FLOAT)) {
+                                $$.type = FLOAT;
+                            }
+                            break;
+                        case LOGICAL_OP:
+                            $$.type = BOOL;
+                        default:
+                            break;
+                    }
                     $$.numParams = $2.numParams;
                     $$.returnType = $2.returnType;
 
