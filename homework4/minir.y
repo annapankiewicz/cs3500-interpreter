@@ -871,10 +871,16 @@ N_REL_OP        : T_LT
 N_VAR           : N_ENTIRE_VAR
                 {
                     printRule("VAR", "ENTIRE_VAR");
+                    $$.type == $1.type;
+                    $$.numParams = $1.numParams;
+                    $$.returnType = $1.returnType;
                 }
                 | N_SINGLE_ELEMENT
                 {
                     printRule("VAR", "SINGLE_ELEMENT");
+                    $$.type == $1.type;
+                    $$.numParams = $1.numParams;
+                    $$.returnType = $1.returnType;
                 }
                 ;
 
@@ -883,9 +889,19 @@ N_SINGLE_ELEMENT : T_IDENT T_LBRACKET T_LBRACKET N_EXPR
                 {
                     printRule("SINGLE_ELEMENT", "IDENT"
                               " [[ EXPR ]]");
-                    if (!findEntryInAnyScope($1)) {
+                    TYPE_INFO exprTypeInfo = findEntryInAnyScope($1);
+                    if(exprTypeInfo.type == UNDEFINED) {
                         yyerror("Undefined identifier");
                         return(0);
+                    }
+                    if(exprTypeInfo.type != LIST) {
+                        yyerror("Arg 1 must be list");
+                        return(0);
+                    }
+                    else {
+                        $$.type = INT_OR_STR_OR_FLOAT_OR_BOOL;
+                        $$.numParams = NOT_APPLICABLE;
+                        $$.returnType = NOT_APPLICABLE;
                     }
                 }
                 ;
@@ -893,11 +909,15 @@ N_SINGLE_ELEMENT : T_IDENT T_LBRACKET T_LBRACKET N_EXPR
 N_ENTIRE_VAR    : T_IDENT
                 {
                     printRule("ENTIRE_VAR", "IDENT");
-                    if(!findEntryInAnyScope($1))
+                    TYPE_INFO exprTypeInfo = findEntryInAnyScope($1);
+                    if(exprTypeInfo.type == UNDEFINED)
                     {
                         yyerror("Undefined identifier");
                         return(0);
                     }
+                    $$.type = exprTypeInfo.type;
+                    $$.numParams = exprTypeInfo.numParams;
+                    $$.returnType = exprTypeInfo.returnType;
                 }
                 ;
 
