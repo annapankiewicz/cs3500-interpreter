@@ -705,6 +705,9 @@ N_SIMPLE_ARITHLOGIC : N_TERM N_ADD_OP_LIST
                 {
                     printRule("SIMPLE_ARITHLOGIC",
                               "TERM ADD_OP_LIST");
+                    $$.type = $1.type;
+                    $$.numParams = $1.numParams;
+                    $$.returnType = $1.returnType;
                 }
                 ;
 
@@ -712,6 +715,15 @@ N_ADD_OP_LIST	: N_ADD_OP N_TERM N_ADD_OP_LIST
                 {
                     printRule("ADD_OP_LIST",
                               "ADD_OP TERM ADD_OP_LIST");
+                    if(($2.type == FUNCTION) || ($2.type == NULL_TYPE) || ($2.type == LIST)) {
+                        yyerror("Arg 2 cannot be function or null or list");
+                    }
+                    if(!(isIntOrFloatOrBoolCompatible($2.type))) {
+                        yyerror("Arg 2 must be integer or float or bool");
+                    }
+                    $$.type = $2.type || $3.type;
+                    $$.numParams = $2.numParams;
+                    $$.returnType = $2.returnType;
                 }
                 | /* epsilon */
                 {
@@ -719,10 +731,13 @@ N_ADD_OP_LIST	: N_ADD_OP N_TERM N_ADD_OP_LIST
                 }
                 ;
 
-N_TERM		: N_FACTOR N_MULT_OP_LIST
+N_TERM		    : N_FACTOR N_MULT_OP_LIST
                 {
                     printRule("TERM",
                               "FACTOR MULT_OP_LIST");
+                    $$.type = $1.type;
+                    $$.numParams = $1.numParams;
+                    $$.returnType = $1.returnType;
                 }
                 ;
 
@@ -730,6 +745,16 @@ N_MULT_OP_LIST	: N_MULT_OP N_FACTOR N_MULT_OP_LIST
                 {
                     printRule("MULT_OP_LIST",
                               "MULT_OP FACTOR MULT_OP_LIST");
+                    if(($2.type == FUNCTION) || ($2.type == NULL_TYPE) || ($2.type == LIST)) {
+                        yyerror("Arg 2 cannot be function or null or list");
+                    }
+                    if(!(isIntOrFloatOrBoolCompatible($2.type))) {
+                        yyerror("Arg 2 must be integer or float or bool");
+                    }
+                    $$.type = $2.type || $3.type;
+                    $$.numParams = $2.numParams;
+                    $$.returnType = $2.returnType;
+
                 }
                 | /* epsilon */
                 {
@@ -740,80 +765,106 @@ N_MULT_OP_LIST	: N_MULT_OP N_FACTOR N_MULT_OP_LIST
 N_FACTOR		: N_VAR
                 {
                     printRule("FACTOR", "VAR");
+                    $$.type == $1.type;
+                    $$.numParams = $1.numParams;
+                    $$.returnType = $1.returnType;
                 }
                 | N_CONST
                 {
                     printRule("FACTOR", "CONST");
+                    $$.type == $1.type;
+                    $$.numParams = $1.numParams;
+                    $$.returnType = $1.returnType;
                 }
                 | T_LPAREN N_EXPR T_RPAREN
                 {
                     printRule("FACTOR", "( EXPR )");
+                    $$.type == $2.type;
+                    $$.numParams = $2.numParams;
+                    $$.returnType = $2.returnType;
                 }
                 | T_NOT N_FACTOR
                 {
                     printRule("FACTOR", "! FACTOR");
+                    $$.type == $2.type;
+                    $$.numParams = $2.numParams;
+                    $$.returnType = $2.returnType;
                 }
                 ;
 
 N_ADD_OP	     : T_ADD
                 {
                     printRule("ADD_OP", "+");
+                    $$ = ARITHMETIC_OP;
                 }
                 | T_SUB
                 {
                     printRule("ADD_OP", "-");
+                    $$ = ARITHMETIC_OP;
                 }
                 | T_OR
                 {
                     printRule("ADD_OP", "|");
+                    $$ = LOGICAL_OP;
                 }
                 ;
 
 N_MULT_OP      : T_MULT
                 {
                     printRule("MULT_OP", "*");
+                    $$ = ARITHMETIC_OP;
                 }
                 | T_DIV
                 {
                     printRule("MULT_OP", "/");
+                    $$ = ARITHMETIC_OP;
                 }
                 | T_AND
                 {
                     printRule("MULT_OP", "&");
+                    $$ = LOGICAL_OP;
                 }
                 | T_MOD
                 {
                     printRule("MULT_OP", "\%\%");
+                    $$ = ARITHMETIC_OP;
                 }
                 | T_POW
                 {
                     printRule("MULT_OP", "^");
+                    $$ = ARITHMETIC_OP;
                 }
                 ;
 
 N_REL_OP        : T_LT
                 {
                     printRule("REL_OP", "<");
+                    $$ = RELATIONAL_OP;
                 }
                 | T_GT
                 {
                     printRule("REL_OP", ">");
+                    $$ = RELATIONAL_OP;
                 }
                 | T_LE
                 {
                     printRule("REL_OP", "<=");
+                    $$ = RELATIONAL_OP;
                 }
                 | T_GE
                 {
                     printRule("REL_OP", ">=");
+                    $$ = RELATIONAL_OP;
                 }
                 | T_EQ
                 {
                     printRule("REL_OP", "==");
+                    $$ = RELATIONAL_OP;
                 }
                 | T_NE
                 {
                     printRule("REL_OP", "!=");
+                    $$ = RELATIONAL_OP;
                 }
                 ;
 
