@@ -622,20 +622,26 @@ N_FUNCTION_CALL : T_IDENT T_LPAREN N_ARG_LIST T_RPAREN
                 {
                     printRule("FUNCTION_CALL", "IDENT"
                               " ( ARG_LIST )");
-                    if (!findEntryInAnyScope($1)) {
+                    TYPE_INFO exprTypeInfo = findEntryInAnyScope($1);
+                    if (exprTypeInfo.type == UNDEFINED) {
                         yyerror("Undefined identifier");
                         return(0);
                     }
-                    TYPE_INFO exprTypeInfo = findEntryInAnyScope($1);
-                    if(exprTypeInfo.type != FUNCTION) {
+                    else if(exprTypeInfo.type != FUNCTION) {
                         yyerror("Arg 1 must be function");
                     }
-                    if($3 > exprTypeInfo.numParams) {
-                        yyerror("Too many parameters in function call");
+                    else {
+                        if($3 > exprTypeInfo.numParams) {
+                            yyerror("Too many parameters in function call");
+                        }
+                        if($3 < exprTypeInfo.numParams) {
+                            yyerror("Too few parameters in function call");
+                        }
                     }
-                    if($3 < exprTypeInfo.numParams) {
-                        yyerror("Too few parameters in function call");
-                    }
+                    $$.type = exprTypeInfo.returnType;
+                    $$.numParams = exprTypeInfo.returnType;
+                    $$.returnType = exprTypeInfo.returnType;
+                    // double check this
                 }
                 ;
 
