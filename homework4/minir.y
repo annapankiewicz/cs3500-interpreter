@@ -982,7 +982,7 @@ bool isBoolCompatible(const int theType)
            (theType == LIST_OR_FLOAT_OR_BOOL_OR_STR) ||
            (theType == LIST_OR_BOOL_OR_STR_OR_INT) ||
            (theType == INT_OR_BOOL_OR_FLOAT_OR_LIST) ||
-           (theType == INT_OR_BOOL_OR_STR_OR_FLOAT_OR_LIST)
+           (theType == INT_OR_BOOL_OR_STR_OR_FLOAT_OR_LIST));
 }
 
 bool isFloatCompatible(const int theType)
@@ -997,7 +997,7 @@ bool isFloatCompatible(const int theType)
            (theType == LIST_OR_FLOAT_OR_BOOL_OR_STR) ||
            (theType == LIST_OR_FLOAT_OR_STR_OR_INT) ||
            (theType == INT_OR_BOOL_OR_FLOAT_OR_LIST) ||
-           (theType == INT_OR_BOOL_OR_STR_OR_FLOAT_OR_LIST)
+           (theType == INT_OR_BOOL_OR_STR_OR_FLOAT_OR_LIST));
 }
 
 bool isListCompatible(const int theType)
@@ -1019,6 +1019,11 @@ bool isIntOrFloatOrBoolCompatible(const int theType)
 {
     return((isIntCompatible(theType)) || (isFloatCompatible(theType)) ||
            (isBoolCompatible(theType)));
+}
+
+bool isIntOrStrOrFloatOrBoolCompatible(const int theType) {
+    return((isIntCompatible(theType)) || (isStrCompatible(theType)) ||
+           (isFloatCompatible(theType)) || (isBoolCompatible(theType)));
 }
 
 void beginScope() {
