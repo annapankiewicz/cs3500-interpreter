@@ -20,11 +20,12 @@ using namespace std;
 #define ARITHMETIC_OP   1
 #define LOGICAL_OP      2
 #define RELATIONAL_OP   3
+#define INDEX_PROD      4
 
 int line_num = 1;
 int numParams = 0;
 int numExprs = 0;
-bool identExists = false;
+bool identAlreadyExisted = false;
 
 stack<SYMBOL_TABLE> scopeStack; // stack of scope hashtables
 
@@ -35,6 +36,7 @@ bool isFloatCompatible(const int theType);
 bool isListCompatible(const int theType);
 
 bool isIntOrFloatOrBoolCompatible(const int theType);
+bool isIntOrStrOrFloatOrBoolCompatible(const int theType);
 
 void beginScope();
 void endScope();
@@ -85,10 +87,12 @@ extern "C"
 %type <typeInfo> N_OUTPUT_EXPR N_INPUT_EXPR N_LIST_EXPR N_FUNCTION_DEF
 %type <typeInfo> N_FUNCTION_CALL N_QUIT_EXPR N_CONST N_EXPR_LIST
 %type <typeInfo> N_LOOP_EXPR N_BREAK_EXPR N_NEXT_EXPR
-%type <typeInfo> N_SIMPLE_ARITHLOGIC N_TERM N_ADD_OP_LIST N_ADD_OP
-%type <typeInfo> N_FACTOR N_MULT_OP_LIST N_VAR N_CONST
+%type <typeInfo> N_SIMPLE_ARITHLOGIC N_TERM N_ADD_OP_LIST
+%type <typeInfo> N_FACTOR N_MULT_OP_LIST N_VAR
+%type <typeInfo> N_SINGLE_ELEMENT N_ENTIRE_VAR
 
-%type <num> N_PARAM_LIST N_PARAMS N_ARG_LIST N_ARGS N_REL_OP N_ADD_OP N_MULT_OP
+%type <num> N_PARAM_LIST N_PARAMS N_ARG_LIST N_ARGS N_INDEX
+%type <num> N_REL_OP N_ADD_OP N_MULT_OP
 
 /*
  *  To eliminate ambiguity in if/else
@@ -267,7 +271,7 @@ N_IF_EXPR       : T_IF T_LPAREN N_EXPR T_RPAREN N_EXPR
                         yyerror("Arg 2 cannot be function");
                     }
 
-                    $$.type = $3.type ^ $5.type;
+                    $$.type = $5.type;
                     $$.numParams = NOT_APPLICABLE;
                     $$.returnType = NOT_APPLICABLE;
                 }
@@ -277,10 +281,18 @@ N_IF_EXPR       : T_IF T_LPAREN N_EXPR T_RPAREN N_EXPR
                     printRule("IF_EXPR", "IF ( EXPR ) EXPR ELSE EXPR");
                     if(($3.type == FUNCTION) || ($3.type == LIST)) {
                         yyerror("Arg 1 cannot be function or list");
+                        return(0);
                     }
                     if($5.type == FUNCTION) {
                         yyerror("Arg 2 cannot be function");
+                        return(0);
                     }
+                    if($7.type == FUNCTION) {
+                        yyerror("Arg 3 cannot be function");
+                        return(0);
+                    }
+
+                    // type is combination of the second and third arg types
                     $$.type = $5.type ^ $7.type;
                     $$.numParams = NOT_APPLICABLE;
                     $$.returnType = NOT_APPLICABLE;
@@ -308,17 +320,42 @@ N_FOR_EXPR      : T_FOR T_LPAREN T_IDENT
                               "FOR ( IDENT IN EXPR ) "
                               "LOOP_EXPR");
                     string lexeme = string($3);
-                    if(!(scopeStack.top().findEntry(lexeme))) {
+                    TYPE_INFO exprTypeInfo = findEntryInAnyScope(lexeme);
+                    if(exprTypeInfo.type == UNDEFINED) {
                         printf("___Adding %s to symbol table\n", $3);
                         bool success = scopeStack.top().addEntry(
-                            SYMBOL_TABLE_ENTRY(lexeme, UNDEFINED));
+                            SYMBOL_TABLE_ENTRY(lexeme,
+                            {NOT_APPLICABLE, NOT_APPLICABLE, NOT_APPLICABLE}));
+                    }
+                    else {
+                        identAlreadyExisted = true;
                     }
                 }
                 T_IN N_EXPR T_RPAREN N_LOOP_EXPR
                 {
-                    if(($8.type == FUNCTION) || ($8.type == NULL_TYPE)) {
+                    string lexeme = string($3);
+                    TYPE_INFO exprTypeInfo = findEntryInAnyScope(lexeme);
+                    if(($6.type == FUNCTION) || ($6.type == NULL_TYPE)) {
                         yyerror("Arg 5 cannot be function or null");
                     }
+                    // check to make sure the T_IDENT type is compatible with
+                    // N_EXPR's type
+                    if(($6.type == LIST) && (identAlreadyExisted)) {
+                        // make sure it's compatible with INT/STRING/BOOL/FLOAT
+                        if(isIntOrStrOrFloatOrBoolCompatible(exprTypeInfo.type))
+                        // change IDENT's entry to be INT_OR_STR_OR_FLOAT_OR_BOOL
+                            scopeStack.top().changeEntry(SYMBOL_TABLE_ENTRY(lexeme,
+                            {INT_OR_STR_OR_FLOAT_OR_BOOL,
+                            NOT_APPLICABLE, NOT_APPLICABLE}));
+                    }
+                    else {
+                        // ident needs to be compatible with type of N_EXPR, but
+                        // since it just got created, we assign it the same type
+                        // as N_EXPR
+                        scopeStack.top().changeEntry(SYMBOL_TABLE_ENTRY(lexeme,
+                            {$6.type, NOT_APPLICABLE, NOT_APPLICABLE}));
+                    }
+                    identAlreadyExisted = false;
                     $$.type = $8.type;
                     $$.numParams = $8.numParams;
                     $$.returnType = $8.returnType;
@@ -400,12 +437,9 @@ N_ASSIGNMENT_EXPR : T_IDENT N_INDEX
                         bool success = scopeStack.top().addEntry(
                             SYMBOL_TABLE_ENTRY(lexeme,
                             {NOT_APPLICABLE, NOT_APPLICABLE, NOT_APPLICABLE}));
-                        if(success) {
-                            identExists = true;
-                        }
                     }
                     else {
-                        identExists = true;
+                        identAlreadyExisted = true;
                     }
                 }
                 T_ASSIGN N_EXPR
@@ -413,8 +447,11 @@ N_ASSIGNMENT_EXPR : T_IDENT N_INDEX
                     // TODO(anna): this is incredibly ugly
                     // first check for compatibility if the IDENT already existed
                     string lexeme = string($1);
-                    if(identExists) {
-                        TYPE_INFO exprTypeInfo = scopeStack.top().findEntry(lexeme);
+                    TYPE_INFO exprTypeInfo = scopeStack.top().findEntry(lexeme);
+                    if(($2 != INDEX_PROD) && (exprTypeInfo.type != LIST)) {
+                        yyerror("Arg 2 must be list");
+                    }
+                    if(identAlreadyExisted) {
                         // check for compatibility with N_EXPR
                         if(!isIntCompatible($5.type) && (isIntCompatible(exprTypeInfo.type)))
                             yyerror("Arg 4 must be an integer");
@@ -431,6 +468,7 @@ N_ASSIGNMENT_EXPR : T_IDENT N_INDEX
                         else if(($5.type != NULL_TYPE) && (exprTypeInfo.type == NULL_TYPE))
                             yyerror("Arg 4 must be null");
                         else {
+                            // if it makes it this far, they're compatible
                             // assign the n_expr type to the ident
                             bool success = scopeStack.top().changeEntry(
                                 SYMBOL_TABLE_ENTRY(lexeme,
@@ -438,13 +476,13 @@ N_ASSIGNMENT_EXPR : T_IDENT N_INDEX
                         }
                     }
                     else {
-                        // if it doesn't exist, just change the type
+                        // if it didn't already exist, just change the type
                         bool success = scopeStack.top().changeEntry(
                             SYMBOL_TABLE_ENTRY(lexeme,
                             {$5.type, NOT_APPLICABLE, NOT_APPLICABLE}));
                     }
 
-                    identExists;
+                    identAlreadyExisted = false;
                     $$.type = $5.type;
                     $$.numParams = $5.numParams;
                     $$.returnType = $5.returnType;
@@ -456,6 +494,7 @@ N_ASSIGNMENT_EXPR : T_IDENT N_INDEX
 N_INDEX :       T_LBRACKET T_LBRACKET N_EXPR T_RBRACKET T_RBRACKET
 			    {
                     printRule("INDEX", " [[ EXPR ]]");
+                    $$ = INDEX_PROD;
 			    }
 			    | /* epsilon */
                 {
