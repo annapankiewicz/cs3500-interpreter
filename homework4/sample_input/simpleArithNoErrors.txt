@@ -1,0 +1,8 @@
+{
+    condition = TRUE;
+    while(condition) {
+	dist = 20
+    };
+    time = 5;
+    speed = dist/time
+}

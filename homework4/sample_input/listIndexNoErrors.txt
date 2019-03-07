@@ -1,0 +1,5 @@
+smoothie = function(index) {
+    banana = list(1, 2, 3, 4);
+    a_banana = banana[[index]];
+    print(a_banana)
+}
