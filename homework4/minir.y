@@ -451,7 +451,7 @@ N_ASSIGNMENT_EXPR : T_IDENT N_INDEX
                     // first check for compatibility if the IDENT already existed
                     string lexeme = string($1);
                     TYPE_INFO exprTypeInfo = scopeStack.top().findEntry(lexeme);
-                    if(($2 != INDEX_PROD) && (exprTypeInfo.type != LIST)) {
+                    if(($2 == INDEX_PROD) && (exprTypeInfo.type != LIST)) {
                         yyerror("Arg 2 must be list");
                     }
                     if(identAlreadyExisted) {
@@ -489,8 +489,6 @@ N_ASSIGNMENT_EXPR : T_IDENT N_INDEX
                     $$.type = $5.type;
                     $$.numParams = $5.numParams;
                     $$.returnType = $5.returnType;
-
-                    // TODO(anna): handle N_INDEX that doesn't go to epsilon
                 }
                 ;
 
