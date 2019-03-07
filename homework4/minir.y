@@ -22,6 +22,9 @@ using namespace std;
 #define RELATIONAL_OP   3
 #define INDEX_PROD      4
 
+// constant to suppress token printing
+const bool suppressTokenOutput = false;
+
 int line_num = 1;
 int numParams = 0;
 int numExprs = 0;
@@ -955,7 +958,9 @@ extern FILE *yyin;
 
 void printTokenInfo(const char* token_type, const char* lexeme)
 {
-    printf("TOKEN: %s \t\t LEXEME: %s\n", token_type, lexeme);
+    if(!suppressTokenOutput) {
+        printf("TOKEN: %s \t\t LEXEME: %s\n", token_type, lexeme);
+    }
 }
 
 void printRule(const char *lhs, const char *rhs)
