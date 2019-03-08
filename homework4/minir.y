@@ -799,28 +799,28 @@ N_MULT_OP_LIST	: N_MULT_OP N_FACTOR N_MULT_OP_LIST
 N_FACTOR		: N_VAR
                 {
                     printRule("FACTOR", "VAR");
-                    $$.type == $1.type;
+                    $$.type = $1.type;
                     $$.numParams = $1.numParams;
                     $$.returnType = $1.returnType;
                 }
                 | N_CONST
                 {
                     printRule("FACTOR", "CONST");
-                    $$.type == $1.type;
+                    $$.type = $1.type;
                     $$.numParams = $1.numParams;
                     $$.returnType = $1.returnType;
                 }
                 | T_LPAREN N_EXPR T_RPAREN
                 {
                     printRule("FACTOR", "( EXPR )");
-                    $$.type == $2.type;
+                    $$.type = $2.type;
                     $$.numParams = $2.numParams;
                     $$.returnType = $2.returnType;
                 }
                 | T_NOT N_FACTOR
                 {
                     printRule("FACTOR", "! FACTOR");
-                    $$.type == $2.type;
+                    $$.type = $2.type;
                     $$.numParams = $2.numParams;
                     $$.returnType = $2.returnType;
                 }
