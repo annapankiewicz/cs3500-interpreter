@@ -23,7 +23,7 @@ using namespace std;
 #define INDEX_PROD      4
 
 // constant to suppress token printing
-const bool suppressTokenOutput = false;
+const bool suppressTokenOutput = true;
 
 int line_num = 1;
 int numParams = 0;
@@ -309,7 +309,7 @@ N_WHILE_EXPR    : T_WHILE T_LPAREN N_EXPR T_RPAREN N_LOOP_EXPR
                               "LOOP_EXPR");
                     if(($3.type == FUNCTION) || ($3.type == LIST) ||
                        ($3.type == NULL_TYPE)) {
-                           yyerror("Arg 3 cannot be function or null or list");
+                           yyerror("Arg 1 cannot be function or null or list");
                        }
                     $$.type = $5.type;
                     $$.numParams = $5.numParams;
@@ -325,7 +325,8 @@ N_FOR_EXPR      : T_FOR T_LPAREN T_IDENT
                     string lexeme = string($3);
                     TYPE_INFO exprTypeInfo = findEntryInAnyScope(lexeme);
                     if(exprTypeInfo.type == UNDEFINED) {
-                        printf("___Adding %s to symbol table\n", $3);
+                        if(!suppressTokenOutput)
+                            printf("___Adding %s to symbol table\n", $3);
                         bool success = scopeStack.top().addEntry(
                             SYMBOL_TABLE_ENTRY(lexeme,
                             {NOT_APPLICABLE, NOT_APPLICABLE, NOT_APPLICABLE}));
@@ -434,7 +435,8 @@ N_ASSIGNMENT_EXPR : T_IDENT N_INDEX
                     string lexeme = string($1);
                     TYPE_INFO exprTypeInfo = scopeStack.top().findEntry(lexeme);
                     if(exprTypeInfo.type == UNDEFINED) {
-                        printf("___Adding %s to symbol table\n", $1);
+                        if(!suppressTokenOutput)
+                            printf("___Adding %s to symbol table\n", $1);
                         // add in as not applicable type until the N_EXPR can be
                         // accessed below to get the correct type
                         bool success = scopeStack.top().addEntry(
@@ -475,14 +477,14 @@ N_ASSIGNMENT_EXPR : T_IDENT N_INDEX
                             // assign the n_expr type to the ident
                             bool success = scopeStack.top().changeEntry(
                                 SYMBOL_TABLE_ENTRY(lexeme,
-                                {$5.type, NOT_APPLICABLE, NOT_APPLICABLE}));
+                                {$5.type, $5.numParams, $5.returnType}));
                         }
                     }
                     else {
                         // if it didn't already exist, just change the type
                         bool success = scopeStack.top().changeEntry(
                             SYMBOL_TABLE_ENTRY(lexeme,
-                            {$5.type, NOT_APPLICABLE, NOT_APPLICABLE}));
+                            {$5.type, $5.numParams, $5.returnType}));
                     }
 
                     identAlreadyExisted = false;
@@ -589,7 +591,8 @@ N_PARAMS        : T_IDENT
                 {
                     printRule("PARAMS", "IDENT");
                     string lexeme = string($1);
-                    printf("___Adding %s to symbol table\n", $1);
+                    if(!suppressTokenOutput)
+                        printf("___Adding %s to symbol table\n", $1);
                     // assuming params are ints according to assignment description
                     TYPE_INFO exprTypeInfo = {INT, NOT_APPLICABLE, NOT_APPLICABLE};
                     bool success = scopeStack.top().addEntry(SYMBOL_TABLE_ENTRY
@@ -605,7 +608,8 @@ N_PARAMS        : T_IDENT
                 {
                     printRule("PARAMS", "IDENT, PARAMS");
                     string lexeme = string($1);
-                    printf("___Adding %s to symbol table\n", $1);
+                    if(!suppressTokenOutput)
+                        printf("___Adding %s to symbol table\n", $1);
                     // assuming params are ints according to assignment description
                     TYPE_INFO exprTypeInfo = {INT, NOT_APPLICABLE, NOT_APPLICABLE};
                     bool success = scopeStack.top().addEntry(SYMBOL_TABLE_ENTRY
@@ -642,7 +646,6 @@ N_FUNCTION_CALL : T_IDENT T_LPAREN N_ARG_LIST T_RPAREN
                     $$.type = exprTypeInfo.returnType;
                     $$.numParams = exprTypeInfo.returnType;
                     $$.returnType = exprTypeInfo.returnType;
-                    // double check this
                 }
                 ;
 
@@ -671,7 +674,7 @@ N_ARGS          : N_EXPR
                     printRule("ARGS", "EXPR");
                     numExprs++;
                     if($1.type != INT) {
-                        string errorMsg = "Arg " + to_string(numExprs) + " must be integer";
+                        string errorMsg = "Arg " + to_string($$ - numExprs) + " must be integer";
                         yyerror(errorMsg.c_str());
                     }
                     $$ = numExprs;
@@ -681,7 +684,7 @@ N_ARGS          : N_EXPR
                     printRule("ARGS", "EXPR, ARGS");
                     numExprs++;
                     if($1.type != INT) {
-                        string errorMsg = "Arg " + to_string(numExprs) + " must be integer";
+                        string errorMsg = "Arg " + to_string($$ - numExprs) + " must be integer";
                         yyerror(errorMsg.c_str());
                     }
                     $$ = numExprs;
@@ -963,7 +966,9 @@ void printTokenInfo(const char* token_type, const char* lexeme)
 
 void printRule(const char *lhs, const char *rhs)
 {
-    printf("%s -> %s\n", lhs, rhs);
+    if(!suppressTokenOutput) {
+        printf("%s -> %s\n", lhs, rhs);
+    }
     return;
 }
 
@@ -1058,12 +1063,14 @@ bool isIntOrStrOrFloatOrBoolCompatible(const int theType) {
 
 void beginScope() {
     scopeStack.push(SYMBOL_TABLE());
-    printf("\n___Entering new scope...\n\n");
+    if(!suppressTokenOutput)
+        printf("\n___Entering new scope...\n\n");
 }
 
 void endScope() {
     scopeStack.pop();
-    printf("\n___Exiting scope...\n\n");
+    if(!suppressTokenOutput)
+        printf("\n___Exiting scope...\n\n");
 }
 
 void cleanUp() {
