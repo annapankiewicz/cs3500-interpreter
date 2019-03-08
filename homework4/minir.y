@@ -302,18 +302,21 @@ N_IF_EXPR       : T_IF T_LPAREN N_EXPR T_RPAREN N_EXPR
                 }
                 ;
 
-N_WHILE_EXPR    : T_WHILE T_LPAREN N_EXPR T_RPAREN N_LOOP_EXPR
+N_WHILE_EXPR    : T_WHILE T_LPAREN N_EXPR
                 {
-                    printRule("WHILE_EXPR", 
-                              "WHILE ( EXPR ) "
-                              "LOOP_EXPR");
                     if(($3.type == FUNCTION) || ($3.type == LIST) ||
                        ($3.type == NULL_TYPE)) {
                            yyerror("Arg 1 cannot be function or null or list");
-                       }
-                    $$.type = $5.type;
-                    $$.numParams = $5.numParams;
-                    $$.returnType = $$.returnType;
+                    }
+                }
+                T_RPAREN N_LOOP_EXPR
+                {
+                    printRule("WHILE_EXPR",
+                              "WHILE ( EXPR ) "
+                              "LOOP_EXPR");
+                    $$.type = $6.type;
+                    $$.numParams = $6.numParams;
+                    $$.returnType = $6.returnType;
                 }
                 ;
 
