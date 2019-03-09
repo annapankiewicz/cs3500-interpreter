@@ -729,7 +729,10 @@ N_ADD_OP_LIST	: N_ADD_OP N_TERM N_ADD_OP_LIST
                     if(($2.type == FUNCTION) || ($2.type == NULL_TYPE) || ($2.type == LIST)) {
                         yyerror("Arg 2 cannot be function or null or list");
                     }
-                    if(!(isIntOrFloatOrBoolCompatible($2.type))) {
+                    else if(($3.type == FUNCTION) || ($3.type == NULL_TYPE) || ($3.type == LIST)) {
+                        yyerror("Arg 1 cannot be function or null or list");
+                    }
+                    else if(!(isIntOrFloatOrBoolCompatible($2.type))) {
                         yyerror("Arg 2 must be integer or float or bool");
                     }
                     switch($1) {
@@ -773,7 +776,10 @@ N_MULT_OP_LIST	: N_MULT_OP N_FACTOR N_MULT_OP_LIST
                     if(($2.type == FUNCTION) || ($2.type == NULL_TYPE) || ($2.type == LIST)) {
                         yyerror("Arg 2 cannot be function or null or list");
                     }
-                    if(!(isIntOrFloatOrBoolCompatible($2.type))) {
+                    else if(($2.type == FUNCTION) || ($2.type == NULL_TYPE) || ($2.type == LIST)) {
+                        yyerror("Arg 1 cannot be function or null or list");
+                    }
+                    else if(!(isIntOrFloatOrBoolCompatible($2.type))) {
                         yyerror("Arg 2 must be integer or float or bool");
                     }
                     switch($1) {
