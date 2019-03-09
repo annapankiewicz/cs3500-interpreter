@@ -350,11 +350,12 @@ N_FOR_EXPR      : T_FOR T_LPAREN T_IDENT
                     if(($6.type == LIST) && (identAlreadyExisted)) {
                         // make sure it's compatible with INT/STRING/BOOL/FLOAT
                         if(isIntOrStrOrFloatOrBoolCompatible(exprTypeInfo.type))
-                        // change IDENT's entry to be INT_OR_STR_OR_FLOAT_OR_BOOL
+                            // change IDENT's entry to be INT_OR_STR_OR_FLOAT_OR_BOOL
                             scopeStack.top().changeEntry(SYMBOL_TABLE_ENTRY(lexeme,
                             {INT_OR_STR_OR_FLOAT_OR_BOOL,
                             NOT_APPLICABLE, NOT_APPLICABLE}));
                     }
+                    // may need more attention to work exactly correctly
                     else {
                         // ident needs to be compatible with type of N_EXPR, but
                         // since it just got created, we assign it the same type
@@ -479,7 +480,7 @@ N_ASSIGNMENT_EXPR : T_IDENT N_INDEX
                         else if(($5.type != NULL_TYPE) && (exprTypeInfo.type == NULL_TYPE))
                             yyerror("Arg 4 must be null");
                         else {
-                            // if it makes it this far, they're compatible
+                            // if it makes it this far, they're compatible, so
                             // assign the n_expr type to the ident
                             bool success = scopeStack.top().changeEntry(
                                 SYMBOL_TABLE_ENTRY(lexeme,
