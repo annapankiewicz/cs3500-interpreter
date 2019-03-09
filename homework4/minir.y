@@ -267,8 +267,9 @@ N_EXPR_LIST     : T_SEMICOLON N_EXPR N_EXPR_LIST
 N_IF_EXPR       : T_IF T_LPAREN N_EXPR T_RPAREN N_EXPR
                 {
                     printRule("IF_EXPR", "IF ( EXPR ) EXPR");
-                    if(($3.type == FUNCTION) || ($3.type == LIST)) {
-                        yyerror("Arg 1 cannot be function or list");
+                    if(($3.type == FUNCTION) || ($3.type == LIST) ||
+                       ($3.type == NULL_TYPE)) {
+                        yyerror("Arg 1 cannot be function or null list");
                     }
                     if($5.type == FUNCTION) {
                         yyerror("Arg 2 cannot be function");
@@ -350,16 +351,17 @@ N_FOR_EXPR      : T_FOR T_LPAREN T_IDENT
                     if(($6.type == LIST) && (identAlreadyExisted)) {
                         // make sure it's compatible with INT/STRING/BOOL/FLOAT
                         if(isIntOrStrOrFloatOrBoolCompatible(exprTypeInfo.type))
-                            // change IDENT's entry to be INT_OR_STR_OR_FLOAT_OR_BOOL
-                            scopeStack.top().changeEntry(SYMBOL_TABLE_ENTRY(lexeme,
-                            {INT_OR_STR_OR_FLOAT_OR_BOOL,
+                            // change IDENT's entry to be
+                            // INT_OR_STR_OR_FLOAT_OR_BOOL
+                            scopeStack.top().changeEntry(SYMBOL_TABLE_ENTRY
+                            (lexeme, {INT_OR_STR_OR_FLOAT_OR_BOOL,
                             NOT_APPLICABLE, NOT_APPLICABLE}));
                     }
                     // may need more attention to work exactly correctly
                     else {
-                        // ident needs to be compatible with type of N_EXPR, but
-                        // since it just got created, we assign it the same type
-                        // as N_EXPR
+                        // ident needs to be compatible with type of N_EXPR,
+                        //  but since it just got created, we assign it
+                        // the same type as N_EXPR
                         scopeStack.top().changeEntry(SYMBOL_TABLE_ENTRY(lexeme,
                             {$6.type, NOT_APPLICABLE, NOT_APPLICABLE}));
                     }
@@ -440,12 +442,13 @@ N_ASSIGNMENT_EXPR : T_IDENT N_INDEX
                     printRule("ASSIGNMENT_EXPR", 
                               "IDENT INDEX ASSIGN EXPR");
                     string lexeme = string($1);
-                    TYPE_INFO exprTypeInfo = scopeStack.top().findEntry(lexeme);
+                    TYPE_INFO exprTypeInfo =
+                        scopeStack.top().findEntry(lexeme);
                     if(exprTypeInfo.type == UNDEFINED) {
                         if(!suppressTokenOutput)
                             printf("___Adding %s to symbol table\n", $1);
-                        // add in as not applicable type until the N_EXPR can be
-                        // accessed below to get the correct type
+                        // add in as not applicable type until the N_EXPR can
+                        // be accessed below to get the correct type
                         bool success = scopeStack.top().addEntry(
                             SYMBOL_TABLE_ENTRY(lexeme,
                             {NOT_APPLICABLE, NOT_APPLICABLE, NOT_APPLICABLE}));
@@ -457,28 +460,36 @@ N_ASSIGNMENT_EXPR : T_IDENT N_INDEX
                 T_ASSIGN N_EXPR
                 {
                     // TODO(anna): this is incredibly ugly
-                    // first check for compatibility if the IDENT already existed
+                    // check for compatibility if the IDENT already existed
                     string lexeme = string($1);
-                    TYPE_INFO exprTypeInfo = scopeStack.top().findEntry(lexeme);
+                    TYPE_INFO exprTypeInfo = 
+                        scopeStack.top().findEntry(lexeme);
                     if(($2 == INDEX_PROD) && (exprTypeInfo.type != LIST)) {
                         yyerror("Arg 2 must be list");
                     }
                     if(identAlreadyExisted) {
                         // check for compatibility with N_EXPR
-                        if(!isIntCompatible($5.type) && (isIntCompatible(exprTypeInfo.type)))
-                            yyerror("Arg 4 must be an integer");
-                        else if((!isStrCompatible($5.type)) && (isStrCompatible(exprTypeInfo.type)))
-                            yyerror("Arg 4 must be a string");
-                        else if((!isBoolCompatible($5.type)) && (isBoolCompatible(exprTypeInfo.type)))
-                            yyerror("Arg 4 must be a bool");
-                        else if((!isFloatCompatible($5.type)) && (isFloatCompatible(exprTypeInfo.type)))
-                            yyerror("Arg 4 must be a float");
-                        else if((!isListCompatible($5.type)) && (isListCompatible(exprTypeInfo.type)))
-                            yyerror("Arg 4 must be a list");
-                        else if(($5.type != FUNCTION) && (exprTypeInfo.type == FUNCTION))
-                            yyerror("Arg 4 must be a function");
-                        else if(($5.type != NULL_TYPE) && (exprTypeInfo.type == NULL_TYPE))
-                            yyerror("Arg 4 must be null");
+                        if(!isIntCompatible($5.type) &&
+                            (isIntCompatible(exprTypeInfo.type)))
+                                yyerror("Arg 4 must be integer");
+                        else if((!isStrCompatible($5.type)) &&
+                            (isStrCompatible(exprTypeInfo.type)))
+                                yyerror("Arg 4 must be string");
+                        else if((!isBoolCompatible($5.type)) &&
+                            (isBoolCompatible(exprTypeInfo.type)))
+                                yyerror("Arg 4 must be bool");
+                        else if((!isFloatCompatible($5.type)) &&
+                            (isFloatCompatible(exprTypeInfo.type)))
+                                yyerror("Arg 4 must be float");
+                        else if((!isListCompatible($5.type)) &&
+                            (isListCompatible(exprTypeInfo.type)))
+                                yyerror("Arg 4 must be list");
+                        else if(($5.type != FUNCTION) &&
+                            (exprTypeInfo.type == FUNCTION))
+                                yyerror("Arg 4 must be function");
+                        else if(($5.type != NULL_TYPE) &&
+                            (exprTypeInfo.type == NULL_TYPE))
+                                yyerror("Arg 4 must be null");
                         else {
                             // if it makes it this far, they're compatible, so
                             // assign the n_expr type to the ident
@@ -600,8 +611,9 @@ N_PARAMS        : T_IDENT
                     string lexeme = string($1);
                     if(!suppressTokenOutput)
                         printf("___Adding %s to symbol table\n", $1);
-                    // assuming params are ints according to assignment description
-                    TYPE_INFO exprTypeInfo = {INT, NOT_APPLICABLE, NOT_APPLICABLE};
+                    // assuming params are ints according to description
+                    TYPE_INFO exprTypeInfo = {INT, NOT_APPLICABLE,
+                                              NOT_APPLICABLE};
                     bool success = scopeStack.top().addEntry(SYMBOL_TABLE_ENTRY
                         (lexeme, exprTypeInfo));
                     if(!success) {
@@ -617,8 +629,9 @@ N_PARAMS        : T_IDENT
                     string lexeme = string($1);
                     if(!suppressTokenOutput)
                         printf("___Adding %s to symbol table\n", $1);
-                    // assuming params are ints according to assignment description
-                    TYPE_INFO exprTypeInfo = {INT, NOT_APPLICABLE, NOT_APPLICABLE};
+                    // assuming params are ints according to description
+                    TYPE_INFO exprTypeInfo = {INT, NOT_APPLICABLE,
+                                              NOT_APPLICABLE};
                     bool success = scopeStack.top().addEntry(SYMBOL_TABLE_ENTRY
                         (lexeme, exprTypeInfo));
                     if(!success) {
@@ -681,7 +694,8 @@ N_ARGS          : N_EXPR
                     printRule("ARGS", "EXPR");
                     numExprs++;
                     if($1.type != INT) {
-                        string errorMsg = "Arg " + to_string($$ - numExprs) + " must be integer";
+                        string errorMsg = "Arg " + to_string($$ - numExprs) +
+                            " must be integer";
                         yyerror(errorMsg.c_str());
                     }
                     $$ = numExprs;
@@ -691,7 +705,8 @@ N_ARGS          : N_EXPR
                     printRule("ARGS", "EXPR, ARGS");
                     numExprs++;
                     if($1.type != INT) {
-                        string errorMsg = "Arg " + to_string($$ - numExprs) + " must be integer";
+                        string errorMsg = "Arg " + to_string($$ - numExprs) +
+                            " must be integer";
                         yyerror(errorMsg.c_str());
                     }
                     $$ = numExprs;
@@ -702,6 +717,9 @@ N_ARITHLOGIC_EXPR : N_SIMPLE_ARITHLOGIC
                 {
                     printRule("ARITHLOGIC_EXPR",
                               "SIMPLE_ARITHLOGIC");
+                    $$.type = $1.type;
+                    $$.numParams = $1.numParams;
+                    $$.returnType = $1.returnType;
                 }
                 | N_SIMPLE_ARITHLOGIC N_REL_OP
                   N_SIMPLE_ARITHLOGIC
@@ -709,6 +727,9 @@ N_ARITHLOGIC_EXPR : N_SIMPLE_ARITHLOGIC
                     printRule("ARITHLOGIC_EXPR",
                               "SIMPLE_ARITHLOGIC REL_OP "
                               "SIMPLE_ARITHLOGIC");
+                    $$.type = $1.type ^ $3.type;
+                    $$.numParams = $1.numParams;
+                    $$.returnType = $1.returnType;
                 }
                 ;
 
@@ -726,10 +747,12 @@ N_ADD_OP_LIST	: N_ADD_OP N_TERM N_ADD_OP_LIST
                 {
                     printRule("ADD_OP_LIST",
                               "ADD_OP TERM ADD_OP_LIST");
-                    if(($2.type == FUNCTION) || ($2.type == NULL_TYPE) || ($2.type == LIST)) {
+                    if(($2.type == FUNCTION) || ($2.type == NULL_TYPE) ||
+                       ($2.type == LIST)) {
                         yyerror("Arg 2 cannot be function or null or list");
                     }
-                    else if(($3.type == FUNCTION) || ($3.type == NULL_TYPE) || ($3.type == LIST)) {
+                    else if(($3.type == FUNCTION) || ($3.type == NULL_TYPE) ||
+                            ($3.type == LIST)) {
                         yyerror("Arg 1 cannot be function or null or list");
                     }
                     else if(!(isIntOrFloatOrBoolCompatible($2.type))) {
@@ -773,10 +796,12 @@ N_MULT_OP_LIST	: N_MULT_OP N_FACTOR N_MULT_OP_LIST
                 {
                     printRule("MULT_OP_LIST",
                               "MULT_OP FACTOR MULT_OP_LIST");
-                    if(($2.type == FUNCTION) || ($2.type == NULL_TYPE) || ($2.type == LIST)) {
+                    if(($2.type == FUNCTION) || ($2.type == NULL_TYPE) ||
+                       ($2.type == LIST)) {
                         yyerror("Arg 2 cannot be function or null or list");
                     }
-                    else if(($2.type == FUNCTION) || ($2.type == NULL_TYPE) || ($2.type == LIST)) {
+                    else if(($2.type == FUNCTION) || ($2.type == NULL_TYPE) ||
+                            ($2.type == LIST)) {
                         yyerror("Arg 1 cannot be function or null or list");
                     }
                     else if(!(isIntOrFloatOrBoolCompatible($2.type))) {
@@ -1023,8 +1048,10 @@ bool isBoolCompatible(const int theType)
     return((theType == BOOL) || (theType == INT_OR_BOOL) ||
            (theType == STR_OR_BOOL) || (theType == BOOL_OR_FLOAT) ||
            (theType == LIST_OR_BOOL) || (theType == INT_OR_STR_OR_BOOL) ||
-           (theType == INT_OR_BOOL_OR_FLOAT) || (theType == STR_OR_BOOL_OR_FLOAT) ||
-           (theType == LIST_OR_INT_OR_BOOL) || (theType == LIST_OR_STR_OR_BOOL) ||
+           (theType == INT_OR_BOOL_OR_FLOAT) ||
+           (theType == STR_OR_BOOL_OR_FLOAT) ||
+           (theType == LIST_OR_INT_OR_BOOL) ||
+           (theType == LIST_OR_STR_OR_BOOL) ||
            (theType == LIST_OR_BOOL_OR_FLOAT) ||
            (theType == INT_OR_STR_OR_FLOAT_OR_BOOL) ||
            (theType == LIST_OR_FLOAT_OR_BOOL_OR_STR) ||
@@ -1038,8 +1065,10 @@ bool isFloatCompatible(const int theType)
     return((theType == FLOAT) || (theType == INT_OR_FLOAT) ||
            (theType == STR_OR_FLOAT) || (theType == BOOL_OR_FLOAT) ||
            (theType == LIST_OR_FLOAT) || (theType == INT_OR_STR_OR_FLOAT) ||
-           (theType == INT_OR_BOOL_OR_FLOAT) || (theType == STR_OR_BOOL_OR_FLOAT) ||
-           (theType == LIST_OR_INT_OR_FLOAT) || (theType == LIST_OR_STR_OR_FLOAT) ||
+           (theType == INT_OR_BOOL_OR_FLOAT) ||
+           (theType == STR_OR_BOOL_OR_FLOAT) ||
+           (theType == LIST_OR_INT_OR_FLOAT) ||
+           (theType == LIST_OR_STR_OR_FLOAT) ||
            (theType == LIST_OR_BOOL_OR_FLOAT) ||
            (theType == INT_OR_STR_OR_FLOAT_OR_BOOL) ||
            (theType == LIST_OR_FLOAT_OR_BOOL_OR_STR) ||
@@ -1053,8 +1082,10 @@ bool isListCompatible(const int theType)
     return((theType == LIST) || (theType == LIST_OR_INT) ||
            (theType == LIST_OR_STR) || (theType == LIST_OR_BOOL) ||
            (theType == LIST_OR_FLOAT) || (theType == LIST_OR_INT_OR_STR) ||
-           (theType == LIST_OR_INT_OR_BOOL) || (theType == LIST_OR_INT_OR_FLOAT) ||
-           (theType == LIST_OR_STR_OR_BOOL) || (theType == LIST_OR_STR_OR_FLOAT) ||
+           (theType == LIST_OR_INT_OR_BOOL) ||
+           (theType == LIST_OR_INT_OR_FLOAT) ||
+           (theType == LIST_OR_STR_OR_BOOL) ||
+           (theType == LIST_OR_STR_OR_FLOAT) ||
            (theType == LIST_OR_BOOL_OR_FLOAT) ||
            (theType == LIST_OR_FLOAT_OR_BOOL_OR_STR) ||
            (theType == LIST_OR_BOOL_OR_STR_OR_INT) ||
