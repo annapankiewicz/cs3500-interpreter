@@ -338,7 +338,7 @@ N_FOR_EXPR      : T_FOR T_LPAREN T_IDENT
                         identAlreadyExisted = true;
                     }
                 }
-                T_IN N_EXPR T_RPAREN N_LOOP_EXPR
+                T_IN N_EXPR T_RPAREN
                 {
                     string lexeme = string($3);
                     TYPE_INFO exprTypeInfo = findEntryInAnyScope(lexeme);
@@ -362,10 +362,13 @@ N_FOR_EXPR      : T_FOR T_LPAREN T_IDENT
                         scopeStack.top().changeEntry(SYMBOL_TABLE_ENTRY(lexeme,
                             {$6.type, NOT_APPLICABLE, NOT_APPLICABLE}));
                     }
+                }
+                N_LOOP_EXPR
+                {
                     identAlreadyExisted = false;
-                    $$.type = $8.type;
-                    $$.numParams = $8.numParams;
-                    $$.returnType = $8.returnType;
+                    $$.type = $9.type;
+                    $$.numParams = $9.numParams;
+                    $$.returnType = $9.returnType;
                 }
                 ;
 
