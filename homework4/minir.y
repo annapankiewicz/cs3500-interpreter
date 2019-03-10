@@ -89,7 +89,6 @@ extern "C"
 %type <typeInfo> N_COMPOUND_EXPR N_ARITHLOGIC_EXPR N_ASSIGNMENT_EXPR
 %type <typeInfo> N_OUTPUT_EXPR N_INPUT_EXPR N_LIST_EXPR N_FUNCTION_DEF
 %type <typeInfo> N_FUNCTION_CALL N_QUIT_EXPR N_CONST N_EXPR_LIST
-%type <typeInfo> N_LOOP_EXPR N_BREAK_EXPR N_NEXT_EXPR
 %type <typeInfo> N_SIMPLE_ARITHLOGIC N_TERM N_ADD_OP_LIST
 %type <typeInfo> N_FACTOR N_MULT_OP_LIST N_VAR
 %type <typeInfo> N_SINGLE_ELEMENT N_ENTIRE_VAR
@@ -310,7 +309,7 @@ N_WHILE_EXPR    : T_WHILE T_LPAREN N_EXPR
                            yyerror("Arg 1 cannot be function or null or list");
                     }
                 }
-                T_RPAREN N_LOOP_EXPR
+                T_RPAREN N_EXPR
                 {
                     printRule("WHILE_EXPR",
                               "WHILE ( EXPR ) "
@@ -366,53 +365,12 @@ N_FOR_EXPR      : T_FOR T_LPAREN T_IDENT
                             {$6.type, NOT_APPLICABLE, NOT_APPLICABLE}));
                     }
                 }
-                N_LOOP_EXPR
+                N_EXPR
                 {
                     identAlreadyExisted = false;
                     $$.type = $9.type;
                     $$.numParams = $9.numParams;
                     $$.returnType = $9.returnType;
-                }
-                ;
-
-N_LOOP_EXPR     : N_EXPR
-                {
-                    printRule("LOOP_EXPR", "EXPR");
-                    $$.type = $1.type;
-                    $$.numParams = $1.numParams;
-                    $$.returnType = $1.returnType;
-                }
-                | N_BREAK_EXPR
-                {
-                    printRule("LOOP_EXPR", "BREAK_EXPR");
-                    $$.type = $1.type;
-                    $$.numParams = $1.numParams;
-                    $$.returnType = $1.returnType;
-                }
-                | N_NEXT_EXPR
-                {
-                    printRule("LOOP_EXPR", "NEXT_EXPR");
-                    $$.type = $1.type;
-                    $$.numParams = $1.numParams;
-                    $$.returnType = $1.returnType;
-                }
-                ;
-
-N_BREAK_EXPR    : T_BREAK
-                {
-                    printRule("BREAK_EXPR", "BREAK");
-                    $$.type = NULL_TYPE;
-                    $$.numParams = NOT_APPLICABLE;
-                    $$.returnType = NOT_APPLICABLE;
-                }
-                ;
-
-N_NEXT_EXPR     : T_NEXT
-                {
-                    printRule("NEXT_EXPR", "NEXT");
-                    $$.type = NULL_TYPE;
-                    $$.numParams = NOT_APPLICABLE;
-                    $$.returnType = NOT_APPLICABLE;
                 }
                 ;
 
@@ -727,6 +685,14 @@ N_ARITHLOGIC_EXPR : N_SIMPLE_ARITHLOGIC
                     printRule("ARITHLOGIC_EXPR",
                               "SIMPLE_ARITHLOGIC REL_OP "
                               "SIMPLE_ARITHLOGIC");
+                    if(($1.type == FUNCTION) || ($1.type == NULL_TYPE) ||
+                       ($1.type == LIST)) {
+                           yyerror("Arg 1 cannot be function or null or list");
+                    }
+                    if(($3.type == FUNCTION) || ($3.type == NULL_TYPE) ||
+                       ($3.type == LIST)) {
+                           yyerror("Arg 2 cannot be function or null or list");
+                    }
                     $$.type = $1.type ^ $3.type;
                     $$.numParams = $1.numParams;
                     $$.returnType = $1.returnType;

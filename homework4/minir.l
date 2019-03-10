@@ -184,16 +184,6 @@ COMMENT #+.*
     return T_IN;
 }
 
-"next" {
-    printTokenInfo("NEXT", yytext);
-    return T_NEXT;
-}
-
-"break" {
-    printTokenInfo("BREAK", yytext);
-    return T_BREAK;
-}
-
 "quit" {
     printTokenInfo("QUIT", yytext);
     return T_QUIT;
