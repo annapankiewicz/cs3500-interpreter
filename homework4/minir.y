@@ -426,43 +426,16 @@ N_ASSIGNMENT_EXPR : T_IDENT N_INDEX
                         yyerror("Arg 2 must be list");
                     }
                     if(identAlreadyExisted) {
-                        // check for compatibility with N_EXPR
-                        if(!isIntCompatible($5.type) &&
-                            (isIntCompatible(exprTypeInfo.type)))
-                                yyerror("Arg 4 must be integer");
-                        else if((!isStrCompatible($5.type)) &&
-                            (isStrCompatible(exprTypeInfo.type)))
-                                yyerror("Arg 4 must be string");
-                        else if((!isBoolCompatible($5.type)) &&
-                            (isBoolCompatible(exprTypeInfo.type)))
-                                yyerror("Arg 4 must be bool");
-                        else if((!isFloatCompatible($5.type)) &&
-                            (isFloatCompatible(exprTypeInfo.type)))
-                                yyerror("Arg 4 must be float");
-                        else if((!isListCompatible($5.type)) &&
-                            (isListCompatible(exprTypeInfo.type)))
-                                yyerror("Arg 4 must be list");
-                        else if(($5.type != FUNCTION) &&
-                            (exprTypeInfo.type == FUNCTION))
-                                yyerror("Arg 4 must be function");
-                        else if(($5.type != NULL_TYPE) &&
-                            (exprTypeInfo.type == NULL_TYPE))
-                                yyerror("Arg 4 must be null");
-                        else {
-                            // if it makes it this far, they're compatible, so
-                            // assign the n_expr type to the ident
                             bool success = scopeStack.top().changeEntry(
                                 SYMBOL_TABLE_ENTRY(lexeme,
                                 {$5.type, $5.numParams, $5.returnType}));
                         }
-                    }
                     else {
                         // if it didn't already exist, just change the type
                         bool success = scopeStack.top().changeEntry(
                             SYMBOL_TABLE_ENTRY(lexeme,
                             {$5.type, $5.numParams, $5.returnType}));
                     }
-
                     identAlreadyExisted = false;
                     $$.type = $5.type;
                     $$.numParams = $5.numParams;
