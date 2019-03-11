@@ -1,0 +1,6 @@
+{
+    the_legend_of_zelda = function(one, two) {
+	three = one + two
+    };
+    cat(the_legend_of_zelda)
+}

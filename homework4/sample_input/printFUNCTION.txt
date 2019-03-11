@@ -1,0 +1,6 @@
+{
+    llama = function(x) {
+	x = 12
+    };
+    print(llama);
+}

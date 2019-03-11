@@ -1,0 +1,4 @@
+{
+    cocktail = cat("mug");
+    sketchbook = cocktail > 177
+}

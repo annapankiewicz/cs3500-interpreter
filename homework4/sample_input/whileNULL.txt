@@ -1,0 +1,6 @@
+{
+    cheese_sauce = cat(4);
+    while(cheese_sauce) {
+	print("tiny tim")
+    }
+}
