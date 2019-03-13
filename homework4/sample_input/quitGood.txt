@@ -1,4 +1,0 @@
-while(3 > 4) {
-    print("good job");
-    quit()
-}

@@ -1,4 +1,0 @@
-{
-    seventeen = 10 + 7;
-    print(seventeen)
-}

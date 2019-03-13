@@ -1,4 +1,0 @@
-{
-    banana = "potassium";
-    a_banana = banana[[20]];
-}

@@ -1,5 +1,0 @@
-smoothie = function(index) {
-    banana = "potassium";
-    a_banana = banana[[index]];
-    print(a_banana)
-}

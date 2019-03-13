@@ -1,5 +1,0 @@
-{
-    hello = "highlighter";
-    hello = "pen";
-    hello = 54
-}

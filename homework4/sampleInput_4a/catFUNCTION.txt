@@ -1,0 +1,4 @@
+{
+    the_legend_of_zelda = function() { "zelda" };
+    cat(the_legend_of_zelda)
+}

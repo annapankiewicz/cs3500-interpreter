@@ -1,4 +1,0 @@
-{
-    apple = 7;
-    apple[[7]] = "string"
-}

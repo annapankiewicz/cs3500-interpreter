@@ -1,6 +1,0 @@
-{
-    flowers_ = function(lily, rose) {
-	bouquet = lily + rose
-    };
-    plant = (4 < flowers_)
-}

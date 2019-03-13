@@ -1,0 +1,7 @@
+{
+    hello = TRUE;
+    hello = 3.14;
+    hello = "pen";
+    hello = 54;
+    hello = list(1, 3.14, "hello", FALSE)
+}

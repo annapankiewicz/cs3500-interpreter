@@ -1,6 +1,0 @@
-{
-    fuzzy_socks = function(x,y,z) {
-	x = 17 + y + z
-    };
-    clock = 134 * 6 + fuzzy_socks
-}
