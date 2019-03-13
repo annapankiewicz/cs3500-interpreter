@@ -54,7 +54,6 @@ public:
       return(info);
     else return(itr->second.getTypeInfo());
   }
-
 };
 
 #endif  // SYMBOL_TABLE_H

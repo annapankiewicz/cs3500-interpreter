@@ -21,6 +21,39 @@ using namespace std;
 #define LOGICAL_OP      2
 #define RELATIONAL_OP   3
 #define INDEX_PROD      4
+#define NOT_INDEX_PROD  5
+
+#define ERR_CANNOT_BE_FUNCT_NULL_OR_LIST	0
+#define ERR_CANNOT_BE_FUNCT					1
+#define ERR_CANNOT_BE_FUNCT_OR_NULL			2
+#define ERR_CANNOT_BE_LIST					3
+#define ERR_MUST_BE_LIST					4
+#define ERR_MUST_BE_FUNCT					5
+#define ERR_MUST_BE_INTEGER					6
+#define ERR_MUST_BE_INT_FLOAT_OR_BOOL		7
+#define ERR_TOO_FEW_PARAMS					8
+#define ERR_TOO_MANY_PARAMS					9
+#define ERR_MULTIPLY_DEFINED_IDENT			10
+#define ERR_UNDEFINED_IDENT					11
+#define ERR_ERROR						    12
+
+const int NUM_ERR_MESSAGES = 13;  // should be ERR_ERROR + 1
+
+const string ERR_MSG[NUM_ERR_MESSAGES] = {
+"cannot be function or null or list",
+"cannot be function",
+"cannot be function or null",
+"cannot be list",
+"must be list",
+"must be function",
+"must be integer",
+"must be integer or float or bool",
+"Too few parameters in function call",
+"Too many parameters in function call",
+"Multiply defined identifier",
+"Undefined identifier",
+"<undefined error>"
+};
 
 // constant to suppress token printing
 const bool suppressTokenOutput = true;
@@ -36,7 +69,6 @@ bool isIntCompatible(const int theType);
 bool isStrCompatible(const int theType);
 bool isBoolCompatible(const int theType);
 bool isFloatCompatible(const int theType);
-bool isListCompatible(const int theType);
 
 bool isIntOrFloatOrBoolCompatible(const int theType);
 bool isIntOrStrOrFloatOrBoolCompatible(const int theType);
@@ -45,6 +77,8 @@ void beginScope();
 void endScope();
 void cleanUp();
 TYPE_INFO findEntryInAnyScope(const string the_name);
+
+void semanticError(const int argNum, const int errNum);
 
 void printTokenInfo(const char* token_type, const char* lexeme);
 
@@ -69,6 +103,7 @@ extern "C"
 %union {
     char* text;
     int num;
+    bool flag;
     TYPE_INFO typeInfo;
 };
 
@@ -93,8 +128,8 @@ extern "C"
 %type <typeInfo> N_FACTOR N_MULT_OP_LIST N_VAR
 %type <typeInfo> N_SINGLE_ELEMENT N_ENTIRE_VAR
 
-%type <num> N_PARAM_LIST N_PARAMS N_ARG_LIST N_ARGS N_INDEX
-%type <num> N_REL_OP N_ADD_OP N_MULT_OP
+%type <num> N_INDEX N_REL_OP N_ADD_OP N_MULT_OP
+%type <num> N_PARAM_LIST N_PARAMS N_ARG_LIST N_ARGS
 
 /*
  *  To eliminate ambiguity in if/else
@@ -268,10 +303,10 @@ N_IF_EXPR       : T_IF T_LPAREN N_EXPR T_RPAREN N_EXPR
                     printRule("IF_EXPR", "IF ( EXPR ) EXPR");
                     if(($3.type == FUNCTION) || ($3.type == LIST) ||
                        ($3.type == NULL_TYPE)) {
-                        yyerror("Arg 1 cannot be function or null list");
+                        semanticError(1, ERR_CANNOT_BE_FUNCT_NULL_OR_LIST);
                     }
                     if($5.type == FUNCTION) {
-                        yyerror("Arg 2 cannot be function");
+                        semanticError(2, ERR_CANNOT_BE_FUNCT);
                     }
 
                     $$.type = $5.type;
@@ -284,15 +319,12 @@ N_IF_EXPR       : T_IF T_LPAREN N_EXPR T_RPAREN N_EXPR
                     printRule("IF_EXPR", "IF ( EXPR ) EXPR ELSE EXPR");
                     if(($3.type == FUNCTION) || ($3.type == LIST)) {
                         yyerror("Arg 1 cannot be function or list");
-                        return(0);
                     }
                     if($5.type == FUNCTION) {
-                        yyerror("Arg 2 cannot be function");
-                        return(0);
+                        semanticError(2, ERR_CANNOT_BE_FUNCT);
                     }
                     if($7.type == FUNCTION) {
-                        yyerror("Arg 3 cannot be function");
-                        return(0);
+                       semanticError(3, ERR_CANNOT_BE_FUNCT);
                     }
 
                     // type is combination of the second and third arg types
@@ -304,9 +336,10 @@ N_IF_EXPR       : T_IF T_LPAREN N_EXPR T_RPAREN N_EXPR
 
 N_WHILE_EXPR    : T_WHILE T_LPAREN N_EXPR
                 {
-                    if(($3.type == FUNCTION) || ($3.type == LIST) ||
-                       ($3.type == NULL_TYPE)) {
-                           yyerror("Arg 1 cannot be function or null or list");
+                    if(($3.type == FUNCTION) || ($3.type == LIST)
+                        || ($3.type == NULL_TYPE)) {
+                      semanticError(1,
+                       ERR_CANNOT_BE_FUNCT_NULL_OR_LIST);
                     }
                 }
                 T_RPAREN N_EXPR
@@ -343,7 +376,7 @@ N_FOR_EXPR      : T_FOR T_LPAREN T_IDENT
                     string lexeme = string($3);
                     TYPE_INFO exprTypeInfo = findEntryInAnyScope(lexeme);
                     if(($6.type == FUNCTION) || ($6.type == NULL_TYPE)) {
-                        yyerror("Arg 5 cannot be function or null");
+                        semanticError(2, ERR_CANNOT_BE_FUNCT_OR_NULL);
                     }
                     // check to make sure the T_IDENT type is compatible with
                     // N_EXPR's type
@@ -409,10 +442,12 @@ N_ASSIGNMENT_EXPR : T_IDENT N_INDEX
                         // be accessed below to get the correct type
                         bool success = scopeStack.top().addEntry(
                             SYMBOL_TABLE_ENTRY(lexeme,
-                            {NOT_APPLICABLE, NOT_APPLICABLE, NOT_APPLICABLE}));
+                            {NOT_APPLICABLE, NOT_APPLICABLE,
+                             NOT_APPLICABLE}));
+                        $<flag>$ = false;
                     }
                     else {
-                        identAlreadyExisted = true;
+                        $<flag>$ = true;
                     }
                 }
                 T_ASSIGN N_EXPR
@@ -422,21 +457,23 @@ N_ASSIGNMENT_EXPR : T_IDENT N_INDEX
                     string lexeme = string($1);
                     TYPE_INFO exprTypeInfo = 
                         scopeStack.top().findEntry(lexeme);
-                    if(($2 == INDEX_PROD) && (exprTypeInfo.type != LIST)) {
-                        yyerror("Arg 2 must be list");
+                    if(($2 == INDEX_PROD) &&
+                        (exprTypeInfo.type != LIST)) {
+                            semanticError(1, ERR_MUST_BE_LIST);
                     }
-                    if(identAlreadyExisted) {
-                            bool success = scopeStack.top().changeEntry(
-                                SYMBOL_TABLE_ENTRY(lexeme,
-                                {$5.type, $5.numParams, $5.returnType}));
-                        }
-                    else {
-                        // if it didn't already exist, just change the type
+                    if($<flag>3) {
                         bool success = scopeStack.top().changeEntry(
                             SYMBOL_TABLE_ENTRY(lexeme,
                             {$5.type, $5.numParams, $5.returnType}));
                     }
-                    identAlreadyExisted = false;
+                    else {
+                        bool success =
+                        scopeStack.top().changeEntry(
+                         SYMBOL_TABLE_ENTRY(lexeme,
+                           {$5.type, $5.numParams, $5.returnType}));
+                    }
+                    if (($2 == INDEX_PROD) && ($5.type == LIST))
+				        semanticError(1, ERR_CANNOT_BE_LIST);
                     $$.type = $5.type;
                     $$.numParams = $5.numParams;
                     $$.returnType = $5.returnType;
@@ -451,6 +488,7 @@ N_INDEX :       T_LBRACKET T_LBRACKET N_EXPR T_RBRACKET T_RBRACKET
 			    | /* epsilon */
                 {
                     printRule("INDEX", " epsilon");
+                    $$ = NOT_INDEX_PROD;
                 }
                 ;
 
@@ -468,7 +506,7 @@ N_OUTPUT_EXPR   : T_PRINT T_LPAREN N_EXPR T_RPAREN
                     printRule("OUTPUT_EXPR", 
                               "PRINT ( EXPR )");
                     if(($3.type == FUNCTION) || ($3.type == NULL_TYPE)) {
-                        yyerror("Arg 3 cannot be function or null");
+                        semanticError(1, ERR_CANNOT_BE_FUNCT_OR_NULL);
                     }
                     $$.type = $3.type;
                     $$.numParams = $3.numParams;
@@ -479,7 +517,7 @@ N_OUTPUT_EXPR   : T_PRINT T_LPAREN N_EXPR T_RPAREN
                     printRule("OUTPUT_EXPR", 
                               "CAT ( EXPR )");
                     if(($3.type == FUNCTION) || ($3.type == NULL_TYPE)) {
-                        yyerror("Arg 3 cannot be function or null");
+                        semanticError(1, ERR_CANNOT_BE_FUNCT_OR_NULL);
                     }
                     $$.type = NULL_TYPE;
                     $$.numParams = $3.numParams;
@@ -508,7 +546,7 @@ N_FUNCTION_DEF  : T_FUNCTION
 
                     endScope();
                     if($6.type == FUNCTION) {
-                        yyerror("Arg 6 cannot be function");
+                        semanticError(2, ERR_CANNOT_BE_FUNCT);
                     }
                     $$.type = FUNCTION;
                     $$.numParams = $4;
@@ -548,8 +586,7 @@ N_PARAMS        : T_IDENT
                     bool success = scopeStack.top().addEntry(SYMBOL_TABLE_ENTRY
                         (lexeme, exprTypeInfo));
                     if(!success) {
-                        yyerror("Multiply defined identifier");
-                        return(1);
+                        semanticError(0, ERR_MULTIPLY_DEFINED_IDENT);
                     }
                     numParams++;
                     $$ = numParams;
@@ -563,11 +600,10 @@ N_PARAMS        : T_IDENT
                     // assuming params are ints according to description
                     TYPE_INFO exprTypeInfo = {INT, NOT_APPLICABLE,
                                               NOT_APPLICABLE};
-                    bool success = scopeStack.top().addEntry(SYMBOL_TABLE_ENTRY
-                        (lexeme, exprTypeInfo));
+                    bool success = scopeStack.top().addEntry(
+                        SYMBOL_TABLE_ENTRY(lexeme, exprTypeInfo));
                     if(!success) {
-                        yyerror("Multiply defined identifier");
-                        return(1);
+                        semanticError(0, ERR_MULTIPLY_DEFINED_IDENT);
                     }
                     numParams++;
                     $$ = numParams;
@@ -580,18 +616,17 @@ N_FUNCTION_CALL : T_IDENT T_LPAREN N_ARG_LIST T_RPAREN
                               " ( ARG_LIST )");
                     TYPE_INFO exprTypeInfo = findEntryInAnyScope($1);
                     if (exprTypeInfo.type == UNDEFINED) {
-                        yyerror("Undefined identifier");
-                        return(0);
+                        semanticError(0, ERR_UNDEFINED_IDENT);
                     }
                     else if(exprTypeInfo.type != FUNCTION) {
-                        yyerror("Arg 1 must be function");
+                        semanticError(1, ERR_MUST_BE_FUNCT);
                     }
                     else {
                         if($3 > exprTypeInfo.numParams) {
-                            yyerror("Too many parameters in function call");
+                            semanticError(0, ERR_TOO_MANY_PARAMS);
                         }
                         if($3 < exprTypeInfo.numParams) {
-                            yyerror("Too few parameters in function call");
+                            semanticError(0, ERR_TOO_FEW_PARAMS);
                         }
                     }
                     $$.type = exprTypeInfo.returnType;
@@ -658,15 +693,17 @@ N_ARITHLOGIC_EXPR : N_SIMPLE_ARITHLOGIC
                     printRule("ARITHLOGIC_EXPR",
                               "SIMPLE_ARITHLOGIC REL_OP "
                               "SIMPLE_ARITHLOGIC");
-                    if(($1.type == FUNCTION) || ($1.type == NULL_TYPE) ||
+                    if(($1.type == FUNCTION) ||
+                       ($1.type == NULL_TYPE) ||
                        ($1.type == LIST)) {
-                           yyerror("Arg 1 cannot be function or null or list");
+                        semanticError(1,ERR_CANNOT_BE_FUNCT_NULL_OR_LIST);
                     }
-                    if(($3.type == FUNCTION) || ($3.type == NULL_TYPE) ||
+                    if(($3.type == FUNCTION) ||
+                       ($3.type == NULL_TYPE) ||
                        ($3.type == LIST)) {
-                           yyerror("Arg 2 cannot be function or null or list");
+                        semanticError(1,ERR_CANNOT_BE_FUNCT_NULL_OR_LIST);
                     }
-                    $$.type = $1.type ^ $3.type;
+                    $$.type = BOOL;
                     $$.numParams = $1.numParams;
                     $$.returnType = $1.returnType;
                 }
@@ -676,9 +713,32 @@ N_SIMPLE_ARITHLOGIC : N_TERM N_ADD_OP_LIST
                 {
                     printRule("SIMPLE_ARITHLOGIC",
                               "TERM ADD_OP_LIST");
-                    $$.type = $1.type;
-                    $$.numParams = $1.numParams;
-                    $$.returnType = $1.returnType;
+                    if(($1.type == FUNCTION) ||
+                       ($1.type == NULL_TYPE) ||
+                       ($1.type == LIST))
+                    {
+                      semanticError(1,ERR_CANNOT_BE_FUNCT_NULL_OR_LIST);
+                    }
+                    if(!(isIntOrFloatOrBoolCompatible
+				     ($1.type)))
+                    {
+                      semanticError(1,ERR_MUST_BE_INT_FLOAT_OR_BOOL);
+                    }
+                    if ($2.type != NOT_APPLICABLE)
+                    {
+                        if (isBoolCompatible($1.type) &&
+                            isBoolCompatible($2.type))
+                              $$.type = BOOL;
+                        else if (isIntCompatible($1.type) &&
+                            isIntCompatible($2.type))
+                              $$.type = INT;
+                        else $$.type = FLOAT;
+                    }
+                    else {
+                        $$.type = $1.type;
+                        $$.numParams = $1.numParams;
+                        $$.returnType = $1.returnType;
+                    }
                 }
                 ;
 
@@ -686,31 +746,31 @@ N_ADD_OP_LIST	: N_ADD_OP N_TERM N_ADD_OP_LIST
                 {
                     printRule("ADD_OP_LIST",
                               "ADD_OP TERM ADD_OP_LIST");
-                    if(($2.type == FUNCTION) || ($2.type == NULL_TYPE) ||
-                       ($2.type == LIST)) {
-                        yyerror("Arg 2 cannot be function or null or list");
+                    int argWithErr = ($3.type == NOT_APPLICABLE)? 2: 1;
+                    if(($2.type == FUNCTION) ||
+                       ($2.type == NULL_TYPE) ||
+                       ($2.type == LIST))
+                    {
+                      semanticError(argWithErr, ERR_CANNOT_BE_FUNCT_NULL_OR_LIST);
                     }
-                    else if(($3.type == FUNCTION) || ($3.type == NULL_TYPE) ||
-                            ($3.type == LIST)) {
-                        yyerror("Arg 1 cannot be function or null or list");
+                    if(!(isIntOrFloatOrBoolCompatible
+				     ($2.type)))
+                    {
+                      semanticError(argWithErr, ERR_MUST_BE_INT_FLOAT_OR_BOOL);
                     }
-                    else if(!(isIntOrFloatOrBoolCompatible($2.type))) {
-                        yyerror("Arg 2 must be integer or float or bool");
-                    }
-                    switch($1) {
-                        case ARITHMETIC_OP:
-                            if(($2.type == INT) && ($3.type == INT)){
+			        if ($1 == LOGICAL_OP)
+				        $$.type = BOOL;
+			        else
+			        {
+				        if ($3.type == NOT_APPLICABLE)
+				            $$.type = $2.type;
+				        else
+				        {
+				        if (isIntCompatible($2.type) &&
+					        isIntCompatible($3.type))
                                 $$.type = INT;
-                            }
-                            else if(($2.type == FLOAT) || ($3.type == FLOAT)) {
-                                $$.type = FLOAT;
-                            }
-                            break;
-                        case LOGICAL_OP:
-                            $$.type = BOOL;
-                            break;
-                        default:
-                            break;
+                        else $$.type = FLOAT;
+				        }
                     }
                     $$.numParams = $2.numParams;
                     $$.returnType = $2.returnType;
@@ -718,6 +778,9 @@ N_ADD_OP_LIST	: N_ADD_OP N_TERM N_ADD_OP_LIST
                 | /* epsilon */
                 {
                     printRule("ADD_OP_LIST", "epsilon");
+                    $$.type = NOT_APPLICABLE;
+                    $$.numParams = NOT_APPLICABLE;
+                    $$.returnType = NOT_APPLICABLE;
                 }
                 ;
 
@@ -725,7 +788,23 @@ N_TERM		    : N_FACTOR N_MULT_OP_LIST
                 {
                     printRule("TERM",
                               "FACTOR MULT_OP_LIST");
-                    $$.type = $1.type;
+                    if ($2.type != NOT_APPLICABLE)
+			        {
+                        if(!(isIntOrFloatOrBoolCompatible
+                           ($1.type)))
+                          semanticError(1, ERR_MUST_BE_INT_FLOAT_OR_BOOL);
+                        if (isBoolCompatible($1.type) &&
+                            isBoolCompatible($2.type))
+                              $$.type = BOOL;
+				        else
+				        {
+                            if (isIntCompatible($1.type) &&
+                                isIntCompatible($2.type))
+                                        $$.type = INT;
+                                    else $$.type = FLOAT;
+				        }
+			         }
+                    else $$.type = $1.type;
                     $$.numParams = $1.numParams;
                     $$.returnType = $1.returnType;
                 }
@@ -735,30 +814,31 @@ N_MULT_OP_LIST	: N_MULT_OP N_FACTOR N_MULT_OP_LIST
                 {
                     printRule("MULT_OP_LIST",
                               "MULT_OP FACTOR MULT_OP_LIST");
-                    if(($2.type == FUNCTION) || ($2.type == NULL_TYPE) ||
-                       ($2.type == LIST)) {
-                        yyerror("Arg 2 cannot be function or null or list");
+                    int argWithErr =
+				    ($3.type == NOT_APPLICABLE)? 2: 1;
+                    if(($2.type == FUNCTION) ||
+                       ($2.type == NULL_TYPE) ||
+                       ($2.type == LIST))
+                    {
+				      semanticError(argWithErr, ERR_CANNOT_BE_FUNCT_NULL_OR_LIST);
                     }
-                    else if(($2.type == FUNCTION) || ($2.type == NULL_TYPE) ||
-                            ($2.type == LIST)) {
-                        yyerror("Arg 1 cannot be function or null or list");
+                    if(!(isIntOrFloatOrBoolCompatible($2.type)))
+                    {
+                      semanticError(argWithErr,ERR_MUST_BE_INT_FLOAT_OR_BOOL);
                     }
-                    else if(!(isIntOrFloatOrBoolCompatible($2.type))) {
-                        yyerror("Arg 2 must be integer or float or bool");
-                    }
-                    switch($1) {
-                        case ARITHMETIC_OP:
-                            if(($2.type == INT) && ($3.type == INT)){
-                                $$.type = INT;
-                            }
-                            else if(($2.type == FLOAT) || ($3.type == FLOAT)) {
-                                $$.type = FLOAT;
-                            }
-                            break;
-                        case LOGICAL_OP:
-                            $$.type = BOOL;
-                        default:
-                            break;
+			        if ($1 == LOGICAL_OP)
+				      $$.type = BOOL;
+			        else
+			        {
+				      if ($3.type == NOT_APPLICABLE)
+				        $$.type = $2.type;
+				      else
+				      {
+                        if (isIntCompatible($2.type) &&
+                            isIntCompatible($3.type))
+                            $$.type = INT;
+                        else $$.type = FLOAT;
+				      }
                     }
                     $$.numParams = $2.numParams;
                     $$.returnType = $2.returnType;
@@ -899,12 +979,10 @@ N_SINGLE_ELEMENT : T_IDENT T_LBRACKET T_LBRACKET N_EXPR
                               " [[ EXPR ]]");
                     TYPE_INFO exprTypeInfo = findEntryInAnyScope($1);
                     if(exprTypeInfo.type == UNDEFINED) {
-                        yyerror("Undefined identifier");
-                        return(0);
+                        semanticError(0, ERR_UNDEFINED_IDENT);
                     }
                     if(exprTypeInfo.type != LIST) {
-                        yyerror("Arg 1 must be list");
-                        return(0);
+                        semanticError(1, ERR_MUST_BE_LIST);
                     }
                     else {
                         $$.type = INT_OR_STR_OR_FLOAT_OR_BOOL;
@@ -920,8 +998,7 @@ N_ENTIRE_VAR    : T_IDENT
                     TYPE_INFO exprTypeInfo = findEntryInAnyScope($1);
                     if(exprTypeInfo.type == UNDEFINED)
                     {
-                        yyerror("Undefined identifier");
-                        return(0);
+                        semanticError(0, ERR_UNDEFINED_IDENT);
                     }
                     $$.type = exprTypeInfo.type;
                     $$.numParams = exprTypeInfo.numParams;
@@ -933,6 +1010,24 @@ N_ENTIRE_VAR    : T_IDENT
 
 #include "lex.yy.c"
 extern FILE *yyin;
+
+//  Construct a string as an argument number (1st param, 0
+//  if no argument number in message) and message (2nd param
+//  index position in ERR_MSG[]). Then call yyerror with that
+//  string.
+void semanticError(const int argNum, const int errNum)
+{
+  string errorMsg;
+  int errNo = errNum;
+
+  if ((errNum < 0) || (errNum > NUM_ERR_MESSAGES-1))
+    errNo = ERR_ERROR;
+  if (argNum > 0)
+    errorMsg = "Arg " + to_string(argNum) + " ";
+  else errorMsg = "";
+  errorMsg += ERR_MSG[errNo];
+  yyerror(errorMsg.c_str());
+}
 
 void printTokenInfo(const char* token_type, const char* lexeme)
 {
