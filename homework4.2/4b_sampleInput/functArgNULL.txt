@@ -1,0 +1,6 @@
+{
+    foo = function(x) { print(x) };
+    x = cat("dog");
+    foo(x);
+    print("bye")
+}

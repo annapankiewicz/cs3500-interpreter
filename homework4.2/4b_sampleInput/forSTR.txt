@@ -1,0 +1,6 @@
+{
+  x = 1;
+  for (x in "Mr. PeanutButter")
+    print(x);
+  print("bad example")
+}

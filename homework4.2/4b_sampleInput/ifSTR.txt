@@ -1,0 +1,7 @@
+{
+  if ("pizza") 
+   1
+  else 
+   0;
+  print("bye")
+}

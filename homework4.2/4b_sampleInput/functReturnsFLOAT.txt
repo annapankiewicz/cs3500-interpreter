@@ -1,0 +1,8 @@
+{
+    radius = function(r) 
+    {
+     3.14 * (r ^ 2)
+    };
+    radius(4);
+    print("This should be correct")
+}

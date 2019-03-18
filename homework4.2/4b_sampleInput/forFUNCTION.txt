@@ -1,0 +1,7 @@
+{
+  foo = function() { 1 };
+  x = 2;
+  for (x in foo)
+    print(x);
+  print("bad example")
+}

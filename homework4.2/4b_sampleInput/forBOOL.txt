@@ -1,0 +1,6 @@
+{
+  x = 1;
+  for (x in FALSE)
+    print(x);
+  print("bad example")
+}

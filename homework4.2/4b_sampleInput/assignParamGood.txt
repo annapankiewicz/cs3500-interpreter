@@ -1,0 +1,13 @@
+{
+    foo = function(x, y, z) 
+    { 
+      x = TRUE;
+      y = 5 > 100;
+      z = 2;
+      A = list(1, FALSE, 3.14, "BoJack");
+      x = A[[2]]
+    };
+    x = "hello";
+    x = FALSE;
+    print("bye")
+}

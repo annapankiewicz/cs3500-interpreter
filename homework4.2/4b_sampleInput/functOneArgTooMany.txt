@@ -1,0 +1,5 @@
+{
+    foo = function(x) { print(x) };
+    foo(100, 200);
+    print("bye")
+}

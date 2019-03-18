@@ -1,0 +1,7 @@
+{
+  if (TRUE)
+    3.14
+  else 
+    function() { print("foo!!!") };
+  print("done!")
+}

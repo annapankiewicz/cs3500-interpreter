@@ -1,0 +1,5 @@
+{
+    foo = function() { 5 };
+    foo(99, 123);
+    print("bye")
+}

@@ -1,0 +1,7 @@
+{
+    foo = function(x, y, z, w) { print(x+y-z*w) };
+    A = list(1, "BoJack", FALSE, 3.14);
+    x = 3;
+    foo(A[[x]], 2, 1 > 2, 5 & 6);
+    print("bye")
+}

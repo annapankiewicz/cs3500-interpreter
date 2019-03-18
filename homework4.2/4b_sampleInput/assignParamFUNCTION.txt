@@ -1,0 +1,9 @@
+{
+    bojack = function(x) 
+    {
+      mrPB = function() { print("Mr. PB") };
+      x = mrPB;
+      cat(x)
+    };
+    print("neigh!")
+}

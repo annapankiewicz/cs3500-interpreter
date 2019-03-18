@@ -1,0 +1,5 @@
+{
+    foo = function(x, y, z, w) { print(x+y-z*w) };
+    foo(1, 2, 3.14, 5);
+    print("bye")
+}

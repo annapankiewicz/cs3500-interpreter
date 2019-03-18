@@ -1,0 +1,8 @@
+{
+    bojack = function(x) 
+    {
+     mrPB = function() { 1 };
+     x = mrPB() 
+    };
+    print("This should be correct")
+}

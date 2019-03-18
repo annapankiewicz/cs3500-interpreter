@@ -1,0 +1,7 @@
+{
+    bojack = function() 
+    { 
+      mrPB = function() { cat("not good") }
+    };
+    print("There should be a problem in this example")
+}

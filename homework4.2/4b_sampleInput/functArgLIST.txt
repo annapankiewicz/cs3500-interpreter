@@ -1,0 +1,5 @@
+{
+    foo = function(x) { print(x) };
+    foo(list(1, 2, 3));
+    print("bye")
+}

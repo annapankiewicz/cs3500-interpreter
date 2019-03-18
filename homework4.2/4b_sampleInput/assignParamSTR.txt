@@ -1,0 +1,8 @@
+{
+    foo = function(x, y, z) 
+    { 
+      y = "Mr. Peanutbutter";
+      x = 100
+    };
+    print("bye")
+}

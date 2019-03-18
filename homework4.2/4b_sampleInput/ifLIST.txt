@@ -1,0 +1,6 @@
+{
+  print("Testing if...");
+  if (list("burger", "shake", "fries")) 
+    cat(8.95);
+  print("done!")
+}

@@ -1,0 +1,8 @@
+{
+    bojack = function() 
+    {
+     "Bojack"
+    };
+    print(bojack());
+    print("This should be correct")
+}

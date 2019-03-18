@@ -1,0 +1,5 @@
+{
+  x = if (TRUE) 3.14 else list(1,2,3);
+  print(x[[1]]);
+  print("This should be correct")
+}

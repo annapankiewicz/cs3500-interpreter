@@ -1,0 +1,6 @@
+{
+  x = 1;
+  for (x in cat("expression"))
+    print(x);
+  print("bad example")
+}

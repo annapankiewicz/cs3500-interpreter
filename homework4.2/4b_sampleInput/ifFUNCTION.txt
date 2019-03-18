@@ -1,0 +1,6 @@
+{
+  foo = function() { print("foo!!!") };
+  if (foo) 
+    print(1);
+  print("done!")
+}

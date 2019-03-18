@@ -1,0 +1,9 @@
+{
+    bojack = function() 
+    {
+     list(1, 2, 3)
+    };
+    A = bojack();
+    print(A[[1]]);
+    print("This should be correct")
+}

@@ -1,0 +1,7 @@
+{
+    foo = function(x) 
+    { 
+      x = 100 * 3.14
+    };
+    print("bye")
+}
