@@ -365,7 +365,8 @@ N_IF_EXPR       : N_COND_IF T_RPAREN N_THEN_EXPR
 
 N_COND_IF	  	: T_IF T_LPAREN N_EXPR 
 			{
-                    if(($3.type == FUNCTION) || ($3.type == LIST)
+                    if(($3.type == FUNCTION)
+                       || ($3.type == LIST)
                        || ($3.type == NULL_TYPE) 
                        || ($3.type == STR)) 
                      semanticError(1,
@@ -388,9 +389,10 @@ N_WHILE_EXPR    : T_WHILE T_LPAREN N_EXPR
                 {
                     printRule("WHILE_EXPR",
                               "WHILE ( EXPR ) EXPR");
-                    if(($3.type == FUNCTION) || ($3.type == LIST)
-                       || ($3.type == NULL_TYPE) 
-                       || ($3.type == STR)) 
+                    if(($3.type == FUNCTION)
+                       || ($3.type == LIST)
+                       || ($3.type == NULL_TYPE)
+                       || ($3.type == STR))
                      semanticError(1,
                        ERR_CANNOT_BE_FUNCT_NULL_LIST_OR_STR);
                 }
@@ -421,12 +423,14 @@ N_FOR_EXPR      : T_FOR T_LPAREN T_IDENT
 				       NOT_APPLICABLE, NOT_APPLICABLE,
 					 false}));
 			   }
-			   else 
+			   else
+			   {
 			    if((exprTypeInfo.type == FUNCTION) || 
                        (exprTypeInfo.type == NULL_TYPE) ||
                        (exprTypeInfo.type == LIST))
 				semanticError(1, 
  				 ERR_CANNOT_BE_FUNCT_OR_NULL_OR_LIST);
+			   }
                 }
 			T_IN N_EXPR
 			{
@@ -476,15 +480,16 @@ N_ASSIGNMENT_EXPR : T_IDENT N_INDEX
                       if(!suppressTokenOutput)
                         printf("___Adding %s to symbol table\n", 
                                $1);
-                    // add in as not applicable type until the
-                    // N_EXPR can be accessed below to get the 
-                    // correct type
-                    bool success = scopeStack.top().addEntry(
+                      // add in as N/A type until the
+                      // N_EXPR can be processed below to
+                      // get the correct type
+                      scopeStack.top().addEntry(
                             SYMBOL_TABLE_ENTRY(lexeme,
                             {NOT_APPLICABLE, NOT_APPLICABLE,
                              NOT_APPLICABLE, false}));
-                    // set flag that ident didn't already exist
-			    $<flag>$ = false;
+                      // set flag that ident didn't already
+				// exist
+			     $<flag>$ = false;
                     }
                     else 
 			   {
@@ -500,26 +505,22 @@ N_ASSIGNMENT_EXPR : T_IDENT N_INDEX
                     if(($2 == INDEX_PROD) &&
 				 (!isListCompatible( 
                           exprTypeInfo.type))) 
-                    {
 				semanticError(1, ERR_MUST_BE_LIST);
-                    }
 			    if ($<flag>3)  // ident already existed 
                     {
 				if (exprTypeInfo.isParam &&
 				    !isIntCompatible($5.type))
 				  semanticError(1, ERR_MUST_BE_INTEGER);
-                      bool success = 
-                       scopeStack.top().changeEntry(
+                      scopeStack.top().changeEntry(
                          SYMBOL_TABLE_ENTRY(lexeme,
                            {$5.type, $5.numParams,
                             $5.returnType, false}));
                     }
                     else 
 			    {
-                    // if it didn't already exist, 
-                    // just change the type
-                        bool success =
-                         scopeStack.top().changeEntry(
+                      // if ident didn't already exist,
+                      // just change the type
+                      scopeStack.top().changeEntry(
                             SYMBOL_TABLE_ENTRY(lexeme,
                             {$5.type, $5.numParams,
                              $5.returnType, false}));
@@ -563,10 +564,8 @@ N_OUTPUT_EXPR   : T_PRINT T_LPAREN N_EXPR T_RPAREN
                               "PRINT ( EXPR )");
                     if(($3.type == FUNCTION) || 
                       ($3.type == NULL_TYPE)) 
-                    {
 				semanticError(1,
 				 ERR_CANNOT_BE_FUNCT_OR_NULL);
-                    }
                     $$.type = $3.type;
                     $$.numParams = $3.numParams;
                     $$.returnType = $3.returnType;
@@ -578,10 +577,8 @@ N_OUTPUT_EXPR   : T_PRINT T_LPAREN N_EXPR T_RPAREN
                               "CAT ( EXPR )");
                     if(($3.type == FUNCTION) || 
                        ($3.type == NULL_TYPE)) 
-                    {
 				semanticError(1,
 				 ERR_CANNOT_BE_FUNCT_OR_NULL);
-                    }
                     $$.type = NULL_TYPE;
                     $$.numParams = $3.numParams;
                     $$.returnType = $3.returnType;
@@ -614,9 +611,7 @@ N_FUNCTION_DEF  : T_FUNCTION
                 {
                     endScope();
                     if($7.type == FUNCTION) 
-                    {
 				semanticError(2, ERR_CANNOT_BE_FUNCT);
-                    }
                     $$.type = FUNCTION;
                     $$.numParams = $<num>5;
                     $$.returnType = $7.type;
@@ -1053,9 +1048,7 @@ N_SINGLE_ELEMENT : T_IDENT T_LBRACKET T_LBRACKET N_EXPR
                     TYPE_INFO exprTypeInfo =
                       findEntryInAnyScope($1);
                     if(exprTypeInfo.type == UNDEFINED) 
-                    {
 				semanticError(0, ERR_UNDEFINED_IDENT);
-                    }
                     if(!isListCompatible(exprTypeInfo.type)) 
 				semanticError(1, ERR_MUST_BE_LIST);  
                     $$.type = INT_OR_STR_OR_FLOAT_OR_BOOL;
@@ -1071,9 +1064,7 @@ N_ENTIRE_VAR    : T_IDENT
                     TYPE_INFO exprTypeInfo = 
                       findEntryInAnyScope(string($1));
                     if(exprTypeInfo.type == UNDEFINED)
-                    {
                       semanticError(0, ERR_UNDEFINED_IDENT);
-                    }
                     $$.type = exprTypeInfo.type;
                     $$.numParams = exprTypeInfo.numParams;
                     $$.returnType = exprTypeInfo.returnType;
@@ -1086,8 +1077,8 @@ N_ENTIRE_VAR    : T_IDENT
 #include "lex.yy.c"
 extern FILE *yyin;
 
-//  Construct a string as an argument number (1st param, 0
-//  if no argument number in message) and message (2nd param
+//  Construct a string as an argument number (argNum, 0
+//  if no argument number in message) and message (errNum is
 //  index position in ERR_MSG[]). Then call yyerror with that
 //  string.
 void semanticError(const int argNum, const int errNum)
@@ -1104,7 +1095,7 @@ void semanticError(const int argNum, const int errNum)
   yyerror(errorMsg.c_str());
 }
 
-// Output token (1st param) and lexeme (2nd param).
+// Output type and lexeme.
 void printTokenInfo(const char* token_type, const char* lexeme)
 {
   if(!suppressTokenOutput) 
@@ -1203,9 +1194,8 @@ TYPE_INFO findEntryInAnyScope(const string the_name)
     TYPE_INFO info = {UNDEFINED, NOT_APPLICABLE, NOT_APPLICABLE};
     if (scopeStack.empty()) return(info);
     info = scopeStack.top().findEntry(the_name);
-    if (info.type != UNDEFINED) {
-        return(info);
-    }
+    if (info.type != UNDEFINED)
+      return(info);
     else 
     { // check in "next higher" scope
         SYMBOL_TABLE symbolTable = scopeStack.top();
