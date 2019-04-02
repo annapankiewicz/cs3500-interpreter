@@ -163,26 +163,6 @@ COMMENT #+.*
     return T_ELSE;
 }
 
-"while" {
-    printTokenInfo("WHILE", yytext);
-    return T_WHILE;
-}
-
-"function" {
-    printTokenInfo("FUNCTION", yytext);
-    return T_FUNCTION;
-}
-
-"for" {
-    printTokenInfo("FOR", yytext);
-    return T_FOR;
-}
-
-"in" {
-    printTokenInfo("IN", yytext);
-    return T_IN;
-}
-
 "quit" {
     printTokenInfo("QUIT", yytext);
     return T_QUIT;
@@ -210,16 +190,19 @@ COMMENT #+.*
 
 {STRCONST} {
     printTokenInfo("STRCONST", yytext);
+    yylval.text = strdup(yytext);
     return T_STRCONST;
 }
 
 {INTCONST} {
     printTokenInfo("INTCONST", yytext);
+    yylval.num = atoi(yytext);
     return T_INTCONST;
 }
 
 {FLOATCONST} {
     printTokenInfo("FLOATCONST", yytext);
+    yylval.float_num = atof(yytext);
     return T_FLOATCONST;
 }
 

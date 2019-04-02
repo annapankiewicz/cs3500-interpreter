@@ -1,26 +1,25 @@
 #ifndef SYMBOL_TABLE_ENTRY_H
 #define SYMBOL_TABLE_ENTRY_H
 
-#include <string>
+#include <string.h>
+#include <list>
 using namespace std;
 
 // type code declarations
 #define UNDEFINED  -1
 #define NULL_TYPE   0
+
 /*
   Defining these first five types as powers of two allows XORing
   any number of them together to create the unique type code we 
   need.
-  FUNCTION doesn't combine with anything, but also having it as a
-  power of two prevents any of the other type codes from adding
-  up to it.
 */
+
 #define INT         2
 #define STR         4
 #define BOOL        8
 #define FLOAT       16
 #define LIST        32
-#define FUNCTION    64
 
 // every unique combination of two type codes
 #define INT_OR_STR        6
@@ -57,12 +56,31 @@ using namespace std;
 #define INT_OR_BOOL_OR_STR_OR_FLOAT_OR_LIST     62
 
 #define NOT_APPLICABLE  -1
+#define NULL_VALUE  -999
 
-typedef struct {
+typedef char CSTRING[256];
+
+typedef struct
+{
+  int type;         // one of the above type codes
+  CSTRING strVal;   // only applicable if type == STR
+  int intVal;       // only applicable if type == INT 
+  float floatVal;   // only applicable if type == FLOAT
+  bool boolVal;     // only applicable if type == BOOL
+} LIST_ENTRY;
+
+typedef list<LIST_ENTRY>* LIST_INFO_PTR;
+
+typedef struct
+{
   int type;         	// one of the above type codes
-  int numParams;    	// # of parameters if function type
-  int returnType;   	// return type if function
-  bool isParam;		// true if ident is a function param
+  CSTRING strVal;   	// only applicable if type == STR
+  int intVal;       	// only applicable if type == INT
+  float floatVal;   	// only applicable if type == FLOAT
+  bool boolVal;     	// only applicable if type == BOOL
+  int nullVal;      	// null value
+  LIST_INFO_PTR listVal; // list value
+  int opStillToDo;  	// opCode (only used for arith expr's)
 } TYPE_INFO;
 
 class SYMBOL_TABLE_ENTRY
@@ -74,12 +92,30 @@ private:
 
 public:
   // Constructors
-  SYMBOL_TABLE_ENTRY( ) {
+  SYMBOL_TABLE_ENTRY( ) 
+  {
     name = "";
     typeInfo.type = UNDEFINED;
-    typeInfo.numParams = UNDEFINED;
-    typeInfo.returnType = UNDEFINED;
-    typeInfo.isParam = false;
+    strcpy(typeInfo.strVal, "");
+    typeInfo.intVal = 0;
+    typeInfo.floatVal = 0;
+    typeInfo.boolVal = false;
+    typeInfo.nullVal = NULL_VALUE;
+    typeInfo.opStillToDo = NOT_APPLICABLE;
+    typeInfo.listVal = NULL;
+  }
+
+  SYMBOL_TABLE_ENTRY(const string theName)
+  {
+    name = theName;
+    typeInfo.type = UNDEFINED;
+    strcpy(typeInfo.strVal, "");
+    typeInfo.intVal = 0;
+    typeInfo.floatVal = 0;
+    typeInfo.boolVal = false;
+    typeInfo.nullVal = NULL_VALUE;
+    typeInfo.opStillToDo = NOT_APPLICABLE;
+    typeInfo.listVal = NULL;
   }
 
   SYMBOL_TABLE_ENTRY(const string theName, 
@@ -87,9 +123,22 @@ public:
   {
     name = theName;
     typeInfo.type = theType.type;
-    typeInfo.numParams = theType.numParams;
-    typeInfo.returnType = theType.returnType;
-    typeInfo.isParam = theType.isParam;
+    strcpy(typeInfo.strVal, theType.strVal);
+    typeInfo.intVal = theType.intVal;
+    typeInfo.floatVal = theType.floatVal;
+    typeInfo.boolVal = theType.boolVal;
+    typeInfo.nullVal = theType.nullVal;
+    typeInfo.opStillToDo = theType.opStillToDo;
+    if (theType.listVal == NULL)
+      typeInfo.listVal = NULL;
+    else
+    {
+      typeInfo.listVal = new list<LIST_ENTRY>;
+      for (std::list<LIST_ENTRY>::iterator it =
+            theType.listVal->begin();
+           it != theType.listVal->end(); it++)
+        typeInfo.listVal->push_back((*it));
+    }
   }
 
   // Accessors

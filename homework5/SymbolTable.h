@@ -45,22 +45,16 @@ public:
 
   // If a SYMBOL_TABLE_ENTRY with name theName is
   // found in this symbol table, then return its type info;
-  // otherwise, return undefined.
+  // otherwise, return type as undefined.
   TYPE_INFO findEntry(string theName)
   {
-    TYPE_INFO info = {UNDEFINED, NOT_APPLICABLE, NOT_APPLICABLE};
+    TYPE_INFO info;
+    info.type = UNDEFINED;
     map<string, SYMBOL_TABLE_ENTRY>::iterator itr;
     if ((itr = hashTable.find(theName)) == hashTable.end())
       return(info);
     else return(itr->second.getTypeInfo());
   }
-
-  // Return # entries in the symbol table
-  int getNumEntries()
-  {
-    return(hashTable.size());
-  }
-
 
 };
 
